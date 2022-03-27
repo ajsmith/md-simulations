@@ -10,6 +10,7 @@ then
 fi
 
 source venv/bin/activate
+pip install --upgrade pip
 
 cd ${PACKAGE_ROOT}
 pip install -r requirements.txt
