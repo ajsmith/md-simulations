@@ -1,8 +1,16 @@
 # Emacs backup files
 *~
 
+# Python artifacts
+__pycache__/
+*.egg-info/
+
 # Ansible inventory file
 /hosts.cfg
 
 # Ansible retry files
 *.retry
+
+# Simulation data files
+*.pdb
+*.psf
