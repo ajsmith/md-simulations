@@ -14,19 +14,19 @@ COL_VOLUME = 18
 def get_parser():
     parser = argparse.ArgumentParser()
     arg_map = {
-        '--min-out': {
+        '--min': {
             'dest': 'min_out',
             'help': 'The minimization step output file.'
         },
-        '--heat-out': {
+        '--heat': {
             'dest': 'heat_out',
             'help': 'The heating step output file.'
         },
-        '--equil-out': {
+        '--equil': {
             'dest': 'equil_out',
             'help': 'The equilibration step output file.'
         },
-        '--quench-out': {
+        '--quench': {
             'dest': 'quench_out',
             'help': 'The production step output file.'
         },
@@ -126,12 +126,16 @@ def plot_production(filepath):
 def main():
     parser = get_parser()
     args = parser.parse_args()
+
     if args.min_out:
         plot_minimzation(args.min_out)
+
     if args.heat_out:
         plot_heating(args.heat_out)
+
     if args.equil_out:
         plot_equilibration(args.equil_out)
+
     if args.quench_out:
         plot_production(args.quench_out)
 
