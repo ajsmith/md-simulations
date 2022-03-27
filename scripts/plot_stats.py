@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import argparse
 import matplotlib.pyplot as plt
 
 COL_TS = 1
@@ -10,8 +11,33 @@ COL_TOTAL = 11
 COL_VOLUME = 18
 
 
-def plot_minimzation():
-    with open('output/val_min.out') as f:
+def get_parser():
+    parser = argparse.ArgumentParser()
+    arg_map = {
+        '--min-out': {
+            'dest': 'min_out',
+            'help': 'The minimization step output file.'
+        },
+        '--heat-out': {
+            'dest': 'heat_out',
+            'help': 'The heating step output file.'
+        },
+        '--equil-out': {
+            'dest': 'equil_out',
+            'help': 'The equilibration step output file.'
+        },
+        '--quench-out': {
+            'dest': 'quench_out',
+            'help': 'The production step output file.'
+        },
+    }
+    for (arg, arg_opts) in arg_map.items():
+        parser.add_argument(arg, **arg_opts)
+    return parser
+
+
+def plot_minimzation(filepath):
+    with open(filepath) as f:
         ts = []
         energy = []
         for line in f.readlines():
@@ -28,8 +54,8 @@ def plot_minimzation():
         fig.savefig('minimization.png')
 
 
-def plot_heating():
-    with open('output/val_heat.out') as f:
+def plot_heating(filepath):
+    with open(filepath) as f:
         ts = []
         energy = []
         temp = []
@@ -51,8 +77,8 @@ def plot_heating():
         fig.savefig('heating.png')
 
 
-def plot_equilibration():
-    with open('output/val_equil.out') as f:
+def plot_equilibration(filepath):
+    with open(filepath) as f:
         ts = []
         temp = []
         cell_size = []
@@ -74,8 +100,8 @@ def plot_equilibration():
         fig.savefig('equilibration.png')
 
 
-def plot_production():
-    with open('output/val_quench.out') as f:
+def plot_production(filepath):
+    with open(filepath) as f:
         ts = []
         energy = []
         temp = []
@@ -98,10 +124,17 @@ def plot_production():
 
 
 def main():
-    plot_minimzation()
-    plot_heating()
-    plot_equilibration()
-    plot_production()
+    parser = get_parser()
+    args = parser.parse_args()
+    if args.min_out:
+        plot_minimzation(args.min_out)
+    if args.heat_out:
+        plot_heating(args.heat_out)
+    if args.equil_out:
+        plot_equilibration(args.equil_out)
+    if args.quench_out:
+        plot_production(args.quench_out)
+
 
 if __name__ == '__main__':
     main()
