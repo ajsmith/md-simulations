@@ -1,2 +1,8 @@
 # Emacs backup files
 *~
+
+# Ansible inventory file
+/hosts.cfg
+
+# Ansible retry files
+*.retry
