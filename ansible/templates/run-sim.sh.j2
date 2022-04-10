@@ -6,14 +6,23 @@ set -e
 cd $(dirname $0)
 project_home=$(pwd)
 
+
 cd ${project_home}
 
 {% for trajectory in simulation.trajectories %}
+{% set lockfile = trajectory.trajectory + '/work.lock' %}
+
 
 echo "Running batch for trajectory {{ trajectory.trajectory }}"
 date
-time {{ trajectory.trajectory }}/run-batch.sh
-echo {{ trajectory.trajectory }} >> project.progress
+
+if [[ ! (-e "{{ lockfile }}") ]]
+then
+    touch "{{ lockfile }}"
+    time {{ trajectory.trajectory }}/run-batch.sh
+    echo {{ trajectory.trajectory }} >> project.progress
+    touch "{{ completed }}"
+fi
 {% endfor %}
 
 echo "Simulation finished!"
