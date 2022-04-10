@@ -4,12 +4,45 @@
   vars:
     project_dir: /var/local/mdsim/project2
     cell_size: 35
+    namd_cores: "{{ ansible_processor_nproc }}"
+    preprod_files:
+      - abf_solv.pdb
+      - abf_solv.psf
+      - abf_water_equil.coor
+      - abf_solv_ions.pdb
+      - abf_solv_ions.psf
+      - abf_ibu_equil.coor
+      - par_all36m_prot_ibu.prm
+      - top_all36_prot_ibu.rtf
+      - toppar_water_ions.str
+    preprod_dir: "{{ project_dir }}/preprod"
   vars_files:
     - vars/sim_config.yaml
   tasks:
+
+    - name: Add directory for pre-production files
+      file:
+        path: "{{ preprod_dir }}"
+        state: directory
+        mode: 0755
+
+    - name: Add pre-production files
+      copy:
+        src: "{{ item }}"
+        dest: "{{ preprod_dir }}/{{ item }}"
+        mode: 0644
+      loop: "{{ preprod_files }}"
 
     - include_tasks: tasks/trajectory.yaml
       loop: "{{ simulation.trajectories }}"
       loop_control:
         loop_var: trajectory
+      vars:
+        trajectory_dir: "{{ project_dir }}/{{ trajectory.trajectory }}"
+
+    - name: Create run-sim.sh script
+      template:
+        src: run-sim.sh.j2
+        dest: "{{ project_dir }}/run-sim.sh"
+        mode: 0755
 ...

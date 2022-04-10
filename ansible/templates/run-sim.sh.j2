@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Abort on error
+set -e
+
+cd $(dirname $0)
+project_home=$(pwd)
+
+cd ${project_home}
+
+{% for trajectory in simulation.trajectories %}
+
+echo "Running batch for trajectory {{ trajectory.trajectory }}"
+date
+time {{ trajectory.trajectory }}/run-batch.sh
+echo {{ trajectory.trajectory }} >> project.progress
+{% endfor %}
+
+echo "Simulation finished!"
+date

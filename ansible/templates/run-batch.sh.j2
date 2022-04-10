@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Abort on error
+set -e
+
+cd $(dirname $0)
+batch_home=$(pwd)
+
+PATH="/var/local/mdsim/NAMD:${PATH}"
+#export LD_LIBRARY_PATH="/var/local/mdsim/NAMD:${LD_LIBRARY_PATH}"
+namd_cores={{ namd_cores }}
+
+cd ${batch_home}
+{% for batch in trajectory.batches %}
+
+echo "Running Trajectory {{ trajectory.trajectory }}: abf_quench{{ batch.batch }}.namd"
+time namd2 +p{{ namd_cores}} abf_quench{{ batch.batch }}.namd \
+     > output/abf_quench{{ batch.batch }}.out
+echo "abf_quench{{ batch.batch }}.namd" >> batch.progress
+{% endfor %}

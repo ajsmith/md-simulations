@@ -1,0 +1,28 @@
+---
+- name: Create trajectory directory
+  file:
+    path: "{{ project_dir }}/{{ trajectory.trajectory }}/output"
+    state: directory
+    recurse: yes
+    mode: 0755
+
+- name: Create NAMD configuration files
+  template:
+    src: "{{ trajectory.config_template }}"
+    dest: "{{ trajectory_dir }}/abf_quench{{ item.batch }}.namd"
+    mode: 0644
+  loop: "{{ trajectory.batches }}"
+
+- name: Create batch run script
+  template:
+    src: run-batch.sh.j2
+    dest: "{{ trajectory_dir}}/run-batch.sh"
+    mode: 0755
+
+- name: Symlink preprod files
+  file:
+    src: "{{ preprod_dir }}/{{ item }}"
+    dest: "{{ trajectory_dir }}/{{ item }}"
+    state: link
+  loop: "{{ preprod_files }}"
+...
