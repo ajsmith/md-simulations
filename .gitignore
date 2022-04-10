@@ -5,6 +5,9 @@
 __pycache__/
 *.egg-info/
 
+# Pytest artifacts
+/.coverage
+
 # Ansible inventory file
 /hosts.cfg
 
