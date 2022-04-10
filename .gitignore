@@ -11,6 +11,9 @@ __pycache__/
 # Ansible inventory file
 /ansible/hosts.cfg
 
+# Files that can't be redistributed
+/ansible/files/nodist
+
 # Ansible retry files
 *.retry
 

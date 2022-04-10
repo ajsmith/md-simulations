@@ -1,0 +1,60 @@
+---
+- name: Setup the simulations
+  hosts: aws
+  vars:
+    project_dir: /mdsim/project2
+    packages:
+      - git
+      - make
+      - nfs-utils
+      - screen
+      - sysstat
+      - unzip
+    namd_dist: NAMD_2.9_Linux-x86_64-multicore
+    namd_archive: "{{ namd_dist }}.tar.gz"
+    vmd_dist: vmd-1.9.3
+    vmd_archive: "{{ vmd_dist }}.bin.LINUXAMD64.text.tar.gz"
+    preprod_dir: "{{ project_dir }}/preprod"
+
+  tasks:
+
+    - name: Install system packages on Fedora
+      dnf:
+        name: "{{ packages }}"
+        state: latest
+      become: yes
+      when:
+        - ansible_distribution == "Fedora"
+
+    - name: Copy and unpack the NAMD and VMD software
+      unarchive:
+        src: "nodist/{{ item }}"
+        dest: "/opt/"
+        owner: root
+        group: root
+      become: yes
+      loop:
+        - "{{ namd_archive }}"
+        - "{{ vmd_archive }}"
+
+    - name: Create symlink for NAMD directory
+      file:
+        src: "/opt/{{ namd_dist }}"
+        dest: "/opt/NAMD"
+        state: link
+      become: yes
+
+    - name: Run VMD configure script
+      command: ./configure
+      args:
+        chdir: "/opt/{{ vmd_dist }}"
+        creates: "/opt/{{ vmd_dist }}/src/Makefile"
+      become: yes
+
+    - name: Install VMD
+      command: make install
+      args:
+        chdir: "/opt/{{ vmd_dist }}/src"
+        creates: /usr/local/bin/vmd
+      become: yes
+...
