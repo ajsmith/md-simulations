@@ -12,16 +12,15 @@ cd ${project_home}
 {% for trajectory in simulation.trajectories %}
 {% set lockfile = trajectory.trajectory + '/work.lock' %}
 
-
 echo "Running batch for trajectory {{ trajectory.trajectory }}"
 date
 
 if [[ ! (-e "{{ lockfile }}") ]]
 then
     touch "{{ lockfile }}"
-    time {{ trajectory.trajectory }}/run-batch.sh
-    echo {{ trajectory.trajectory }} >> project.progress
-    touch "{{ completed }}"
+    time "{{ trajectory.trajectory }}"/run-batch.sh
+    echo "{{ trajectory.trajectory }}" >> project.progress
+    touch "{{ trajectory.trajectory }}/completed"
 fi
 {% endfor %}
 

@@ -2,7 +2,7 @@
 - name: Setup the simulations
   hosts: aws
   vars:
-    project_dir: /var/local/mdsim/project2
+    project_dir: /mdsim/project2
     cell_size: 35
     namd_cores: "{{ ansible_processor_nproc }}"
     preprod_files:

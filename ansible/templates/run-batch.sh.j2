@@ -6,15 +6,21 @@ set -e
 cd $(dirname $0)
 batch_home=$(pwd)
 
-PATH="/var/local/mdsim/NAMD:${PATH}"
-#export LD_LIBRARY_PATH="/var/local/mdsim/NAMD:${LD_LIBRARY_PATH}"
-namd_cores={{ namd_cores }}
+PATH="/opt/NAMD:${PATH}"
+# export LD_LIBRARY_PATH="/opt/NAMD:${LD_LIBRARY_PATH}"
+# namd_cores={{ namd_cores }}
 
 cd ${batch_home}
 {% for batch in trajectory.batches %}
+{% set batch_file = 'abf_quench' + batch.batch + '.namd' %}
+{% set out_file = 'abf_quench' + batch.batch + '.out' %}
 
-echo "Running Trajectory {{ trajectory.trajectory }}: abf_quench{{ batch.batch }}.namd"
-time namd2 +p{{ namd_cores}} abf_quench{{ batch.batch }}.namd \
-     > output/abf_quench{{ batch.batch }}.out
-echo "abf_quench{{ batch.batch }}.namd" >> batch.progress
+if [[ -z "$(grep '{{ batch_file }}' batch.progress)" ]]
+then
+    echo "Running Trajectory {{ trajectory.trajectory }}: {{ batch_file }}"
+    time namd2 +p{{ namd_cores}} {{ batch_file }} > output/{{ out_file }}
+    echo "{{ batch_file }}" >> batch.progress
+else
+    echo "Skipping {{ batch_file }} which has already been done."
+fi
 {% endfor %}
