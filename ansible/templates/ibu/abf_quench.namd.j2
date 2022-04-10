@@ -1,0 +1,69 @@
+# input system......
+
+structure	abf_solv_ions.psf
+coordinates     ./output/abf_equil.coor
+{% if item.previous_batch %}
+bincoordinates  ./output/abfi_quench{{ item.previous_batch }}.coor
+binvelocities   ./output/abfi_quench{{ item.previous_batch }}.vel
+{% endif %}
+
+#..force field........................
+paratypecharmm	on
+parameters	par_all36m_prot_ibu.prm
+parameters	toppar_water_ions.str
+exclude		scaled1-4
+1-4scaling	1.0
+dielectric      1.0
+
+switching	on
+switchdist	8.0
+cutoff		12.0
+pairlistdist	13.5
+margin		0.0
+stepspercycle	20
+rigidBonds      all
+rigidTolerance  0.00001
+rigidIterations 100
+
+# Ewald EL..........................
+PME             on
+PMETolerance    0.000001
+PMEGridSizeX    36
+PMEGridSizeY    36
+PMEGridSizeZ    36
+
+#integrator ............
+timestep 1.0                             # OK
+fullElectFrequency  4                    # OK
+
+#output....................
+outputenergies	1000
+outputtiming	1000
+binaryoutput	no
+outputname	output/abf_quench{{ item.batch }}
+restartname     output/abfi_quench{{ item.batch }}
+restartfreq     10000
+binaryrestart   yes
+DCDfile         output/abf_quench{{ item.batch }}.dcd
+dcdfreq		1000
+
+#MD protocol..............
+seed            {{ item.seed }}
+numsteps        2000000
+{% if not item.previous_batch %}
+temperature     330
+{% endif %}
+
+langevin          on
+langevinDamping   5
+langevinTemp      330
+langevinHydrogen  off
+
+
+
+# periodic boundary conditions......
+cellBasisVector1    {{ cell_size }}    0.0   0.0
+cellBasisVector2    0.0    {{ cell_size }}   0.0
+cellBasisVector3    0.0    0.0   {{ cell_size }}
+cellOrigin          0.0    0.0   0.0
+wrapAll          on

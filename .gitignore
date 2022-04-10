@@ -9,7 +9,7 @@ __pycache__/
 /.coverage
 
 # Ansible inventory file
-/hosts.cfg
+/ansible/hosts.cfg
 
 # Ansible retry files
 *.retry

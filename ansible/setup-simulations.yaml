@@ -1,0 +1,15 @@
+---
+- name: Setup the simulations
+  hosts: aws
+  vars:
+    project_dir: /var/local/mdsim/project2
+    cell_size: 35
+  vars_files:
+    - vars/sim_config.yaml
+  tasks:
+
+    - include_tasks: tasks/trajectory.yaml
+      loop: "{{ simulation.trajectories }}"
+      loop_control:
+        loop_var: trajectory
+...
