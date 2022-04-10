@@ -5,6 +5,7 @@ entry_points = """\
 mdsim-plot=mdsim.plot_stats:main
 mdsim-cell-size=mdsim.find_cell_size:main
 mdsim-check-coords=mdsim.check_coordinates:main
+mdsim-batch-config=mdsim.batch:main
 """
 
 package_data = {

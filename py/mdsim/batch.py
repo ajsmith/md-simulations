@@ -1,10 +1,9 @@
+"""Utilities to generate batch configurations for production simulations.
+
+"""
 import argparse
-import sys
-from pathlib import Path
 
 import yaml
-
-import mdsim.defaults
 
 
 def make_seed(student_id, trajectory_id, step_id):
@@ -35,10 +34,10 @@ def make_batch_config(student_id, trajectory_id, step_id):
     return result
 
 
-def make_trajectory_config(student_id, trajectory_id, steps, config_template):
+def make_trajectory_config(student_id, trajectory_id, steps, template):
     result = {
         'trajectory': trajectory_name(trajectory_id),
-        'config_template': config_template,
+        'config_template': template,
     }
     batch_configs = [
         make_batch_config(student_id, trajectory_id, i)
@@ -46,3 +45,51 @@ def make_trajectory_config(student_id, trajectory_id, steps, config_template):
     ]
     result['batches'] = batch_configs
     return result
+
+
+def make_simulation_config(student_id, trajectory_plan, steps):
+    tr_configs = [
+        make_trajectory_config(student_id, tr_id, steps, tmpl)
+        for (tr_id, tmpl) in trajectory_plan.items()
+    ]
+    return {'trajectories': tr_configs}
+
+
+def save_yaml(file_name, sim_config):
+    obj = {'simulation': sim_config}
+    with open(file_name, 'w') as f:
+        yaml.dump(obj, f)
+
+
+def get_main_parser():
+    parser = argparse.ArgumentParser()
+    arg_map = {
+        '--plan': {
+            'dest': 'plan',
+            'help': 'The plan file',
+            'required': True,
+        },
+        '--out': {
+            'dest': 'out',
+            'help': 'The output file',
+            'required': True,
+        },
+    }
+    for (arg, arg_opts) in arg_map.items():
+        parser.add_argument(arg, **arg_opts)
+    return parser
+
+
+def main(argv=None):
+    parser = get_main_parser()
+    if argv is not None:
+        args = parser.parse_args(argv[1:])
+    else:
+        args = parser.parse_args()
+    with open(args.plan, 'rb') as plan_file:
+        plan_obj = yaml.load(plan_file, yaml.Loader)
+        student_id = plan_obj['student_id']
+        steps = plan_obj['steps']
+        tr_plan = plan_obj['plan']
+        sim_config = make_simulation_config(student_id, tr_plan, steps)
+        save_yaml(args.out, sim_config)
