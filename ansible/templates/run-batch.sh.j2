@@ -10,7 +10,6 @@ PATH="/opt/NAMD:${PATH}"
 # export LD_LIBRARY_PATH="/opt/NAMD:${LD_LIBRARY_PATH}"
 # namd_cores={{ namd_cores }}
 
-cd ${batch_home}
 {% for batch in trajectory.batches %}
 {% set batch_file = 'abf_quench' + batch.batch + '.namd' %}
 {% set out_file = 'abf_quench' + batch.batch + '.out' %}

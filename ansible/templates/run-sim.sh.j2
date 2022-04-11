@@ -6,9 +6,6 @@ set -e
 cd $(dirname $0)
 project_home=$(pwd)
 
-
-cd ${project_home}
-
 {% for trajectory in simulation.trajectories %}
 {% set lockfile = trajectory.trajectory + '/work.lock' %}
 
