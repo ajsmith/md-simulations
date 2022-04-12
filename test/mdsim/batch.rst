@@ -9,13 +9,13 @@ batch smaller segments. The output of one segment becomes the input to
 the next, and this way we can provide some fault tolerance. The
 `mdsim.batch` module provides utilities for working with such batches.
 
-The following data is used in configuring a batch.
+The following data is used in configuring a batch::
 
     >>> student_id = 6
     >>> trajectory_id = 1
     >>> step_id = 0
 
-Let's get the random seed for the first, second, and third segments.
+Let's get the random seed for the first, second, and third segments::
 
     >>> from mdsim.batch import make_seed
     >>> make_seed(student_id, trajectory_id, step_id)
@@ -25,7 +25,7 @@ Let's get the random seed for the first, second, and third segments.
     >>> make_seed(student_id, trajectory_id, step_id + 2)
     '60102'
 
-Now let's generate the configuration for a three-step batch.
+Now let's generate the configuration for a three-step batch::
 
     >>> from mdsim.batch import make_batch_config
     >>> batch_configs = [
@@ -40,7 +40,7 @@ Now let's generate the configuration for a three-step batch.
     {'batch': '02', 'previous_batch': '01', 'seed': '60102'}
 
 Now let's configure a trajectory with three steps. Trajectory configs
-also specify a configuration template to use.
+also specify a configuration template to use::
 
     >>> from mdsim.batch import make_trajectory_config
     >>> config_template = 'quench.namd.j2'
