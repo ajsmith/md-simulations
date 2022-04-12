@@ -4,68 +4,41 @@
   vars:
     project_dir: /mdsim/project2
     download_dir: download
-    trajectories:
-      - 01
-      - 02
-      - 03
-      - 04
-      - 05
-      - 06
-      - 07
-      - 08
     sim_files:
-      # - 01/abf_quench00.namd
-      # - 01/abf_quench01.namd
-      # - 01/output/abf_quench00.out
-      # - 02/abf_quench00.namd
-      # - 02/abf_quench01.namd
-      # - 02/output/abf_quench00.out
-      # - 03/abf_quench00.namd
-      # - 03/abf_quench01.namd
-      # - 03/output/abf_quench00.out
-      # - 04/abf_quench00.namd
-      # - 04/abf_quench01.namd
-      # - 04/output/abf_quench00.out
-      # - 05/abf_quench00.namd
-      # - 05/abf_quench01.namd
-      # - 05/output/abf_quench00.out
-      # - 06/abf_quench00.namd
-      # - 06/abf_quench01.namd
-      # - 06/output/abf_quench00.out
-      # - 07/abf_quench00.namd
-      # - 07/abf_quench01.namd
-      # - 07/output/abf_quench00.out
-      # - 08/abf_quench00.namd
-      # - 08/abf_quench01.namd
-      # - 08/output/abf_quench00.out
-
-      - 01/abf_quench*.namd
+      - 01/abf_quench00.namd
+      - 01/abf_quench01.namd
       - 01/output/abf_quench00.out
-      - 02/abf_quench*.namd
+      - 02/abf_quench00.namd
+      - 02/abf_quench01.namd
       - 02/output/abf_quench00.out
-      - 03/abf_quench*.namd
+      - 03/abf_quench00.namd
+      - 03/abf_quench01.namd
       - 03/output/abf_quench00.out
-      - 04/abf_quench*.namd
+      - 04/abf_quench00.namd
+      - 04/abf_quench01.namd
       - 04/output/abf_quench00.out
-      - 05/abf_quench*.namd
+      - 05/abf_quench00.namd
+      - 05/abf_quench01.namd
       - 05/output/abf_quench00.out
-      - 06/abf_quench*.namd
+      - 06/abf_quench00.namd
+      - 06/abf_quench01.namd
       - 06/output/abf_quench00.out
-      - 07/abf_quench*.namd
+      - 07/abf_quench00.namd
+      - 07/abf_quench01.namd
       - 07/output/abf_quench00.out
-      - 08/abf_quench*.namd
+      - 08/abf_quench00.namd
+      - 08/abf_quench01.namd
       - 08/output/abf_quench00.out
   tasks:
 
     - name: Create the download directory
       local_action:
         module: ansible.builtin.file
-        path: "{{ download_dir }}" #"/{{ project_dir }}/{{ item }}/output"
+        path: "{{ download_dir }}"
         state: directory
         recurse: yes
         mode: 0755
       run_once: yes
-      # loop: "{{ trajectories }}"
 
     - name: Fetch the simulation files
       fetch:
