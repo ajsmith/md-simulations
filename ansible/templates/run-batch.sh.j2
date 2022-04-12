@@ -14,6 +14,8 @@ PATH="/opt/NAMD:${PATH}"
 {% set batch_file = 'abf_quench' + batch.batch + '.namd' %}
 {% set out_file = 'abf_quench' + batch.batch + '.out' %}
 
+touch batch.progess
+
 if [[ -z "$(grep '{{ batch_file }}' batch.progress)" ]]
 then
     echo "Running Trajectory {{ trajectory.trajectory }}: {{ batch_file }}"
