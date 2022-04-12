@@ -1,0 +1,49 @@
+---
+- name: Setup the simulations
+  hosts: workers
+  vars:
+    project_dir: /mdsim/project2
+  tasks:
+
+    - name: Run simulation scripts using screen
+      command: "screen -L -d -m {{ project_dir }}/run-sim.sh"
+      args:
+        creates: screenlog.0
+      throttle: 1
+
+    - name: Check screen logs
+      command: tail screenlog.0
+      register: screenlog_output
+
+    - name: Show screen logs
+      debug:
+        msg: "{{ screenlog_output.stdout_lines }}"
+
+    - name: Check completed trajectories
+      command: "find {{ project_dir }} -name 'completed'"
+      run_once: yes
+      register: completed_output
+
+    - name: Show completed trajectories
+      debug:
+        msg: "{{ completed_output.stdout_lines }}"
+      run_once: yes
+
+    # - name: Find progress files
+    #   command: "find {{ project_dir }} -name 'batch.progress'"
+    #   run_once: yes
+    #   register: find_batch_progress_output
+
+    # - name: Get batch progress
+    #   command:
+
+    # - name: Show batch progress
+    #   debug:
+    #     msg: "{{ find_batch_progress_output.stdout_lines }}"
+    #   run_once: yes
+
+    # - name: Show completed trajectories
+    #   debug:
+    #     msg: "{{ completed_output.stdout_lines }}"
+    #   run_once: yes
+...
