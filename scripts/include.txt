@@ -1,0 +1,2 @@
+*.namd
+abf_quench00.out
