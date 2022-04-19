@@ -32,6 +32,7 @@ simulation:
       previous_batch: 08
       seed: '60109'
     config_template: ibu/abf_quench.namd.j2
+    experiment: ibu
     trajectory: '01'
   - batches:
     - batch: '00'
@@ -65,6 +66,7 @@ simulation:
       previous_batch: 08
       seed: '60209'
     config_template: ibu/abf_quench.namd.j2
+    experiment: ibu
     trajectory: '02'
   - batches:
     - batch: '00'
@@ -98,6 +100,7 @@ simulation:
       previous_batch: 08
       seed: '60309'
     config_template: ibu/abf_quench.namd.j2
+    experiment: ibu
     trajectory: '03'
   - batches:
     - batch: '00'
@@ -131,6 +134,7 @@ simulation:
       previous_batch: 08
       seed: '60409'
     config_template: ibu/abf_quench.namd.j2
+    experiment: ibu
     trajectory: '04'
   - batches:
     - batch: '00'
@@ -164,6 +168,7 @@ simulation:
       previous_batch: 08
       seed: '60509'
     config_template: water/abf_quench.namd.j2
+    experiment: water
     trajectory: '05'
   - batches:
     - batch: '00'
@@ -197,6 +202,7 @@ simulation:
       previous_batch: 08
       seed: '60609'
     config_template: water/abf_quench.namd.j2
+    experiment: water
     trajectory: '06'
   - batches:
     - batch: '00'
@@ -230,6 +236,7 @@ simulation:
       previous_batch: 08
       seed: '60709'
     config_template: water/abf_quench.namd.j2
+    experiment: water
     trajectory: '07'
   - batches:
     - batch: '00'
@@ -263,4 +270,5 @@ simulation:
       previous_batch: 08
       seed: '60809'
     config_template: water/abf_quench.namd.j2
+    experiment: water
     trajectory: 08
