@@ -170,7 +170,7 @@ def plot_production(config):
         ax2.set_ylabel('temperature')
         fig.suptitle(suptitle)
         fig.tight_layout()
-        fig.savefig('production.png')
+        fig.savefig(output_file)
 
 
 def main():
