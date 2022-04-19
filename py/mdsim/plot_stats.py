@@ -2,6 +2,7 @@
 
 import argparse
 import sys
+from math import log
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -53,7 +54,13 @@ def get_file_path(config, filepath):
 
 def file_path_pair(config, section):
     """Return input and output file paths for a config section."""
-    input_path = get_file_path(config, config[section]['input'])
+    input_obj = config[section]['input']
+    if isinstance(input_obj, str):
+        input_path = get_file_path(config, input_obj)
+    else:
+        input_path = []
+        for path in input_obj:
+            input_path.append(get_file_path(config, path))
     output_path = get_file_path(config, config[section]['output'])
     return (input_path, output_path)
 
@@ -148,29 +155,35 @@ def plot_equilibration(config):
 def plot_production(config):
     section = 'quench'
     suptitle = config[section].get('suptitle', 'Quench')
-    input_file, output_file = file_path_pair(config, section)
+    input_files, output_file = file_path_pair(config, section)
     print_plot_step(config, section)
-    with open(input_file) as f:
-        ts = []
-        energy = []
-        temp = []
-        for line in f.readlines():
-            if line.startswith('ENERGY:'):
-                cols = line.split()
-                ts.append(int(cols[COL_TS]))
-                temp.append(float(cols[COL_TEMP]))
-                energy.append(float(cols[COL_TOTAL]))
-        fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True)
-        ax1.plot(ts, energy)
-        ax1.set_title('Total Energy')
-        ax1.set_ylabel(r'$E_{total}$')
-        ax2.plot(ts, temp)
-        ax2.set_title('Temperature')
-        ax2.set_xlabel('ts')
-        ax2.set_ylabel('temperature')
-        fig.suptitle(suptitle)
-        fig.tight_layout()
-        fig.savefig(output_file)
+    ts = []
+    i = 0
+    energy = []
+    temp = []
+    for input_file in input_files:
+        print(input_file)
+        with open(input_file) as f:
+            for line in f.readlines():
+                if line.startswith('ENERGY:'):
+                    if i % len(input_files) == 0:
+                        cols = line.split()
+                        # t = int(cols[COL_TS])
+                        ts.append(i * 1000)
+                        temp.append(float(cols[COL_TEMP]))
+                        energy.append(float(cols[COL_TOTAL]))
+                    i += 1
+    fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True)
+    ax1.plot(ts, energy, lw=0.7)
+    # ax1.set_title('Total Energy')
+    ax1.set_ylabel(r'$E_{total}$')
+    ax2.plot(ts, temp, lw=0.7)
+    # ax2.set_title('Temperature')
+    ax2.set_xlabel('ts')
+    ax2.set_ylabel('temperature')
+    fig.suptitle(suptitle)
+    fig.tight_layout()
+    fig.savefig(output_file)
 
 
 def main():
