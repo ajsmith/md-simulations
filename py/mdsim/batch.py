@@ -34,9 +34,11 @@ def make_batch_config(student_id, trajectory_id, step_id):
     return result
 
 
-def make_trajectory_config(student_id, trajectory_id, steps, template):
+def make_trajectory_config(
+        student_id, trajectory_id, experiment, steps, template):
     result = {
         'trajectory': trajectory_name(trajectory_id),
+        'experiment': experiment,
         'config_template': template,
     }
     batch_configs = [
@@ -49,8 +51,10 @@ def make_trajectory_config(student_id, trajectory_id, steps, template):
 
 def make_simulation_config(student_id, trajectory_plan, steps):
     tr_configs = [
-        make_trajectory_config(student_id, tr_id, steps, tmpl)
-        for (tr_id, tmpl) in trajectory_plan.items()
+        make_trajectory_config(
+            student_id, tr_id, tr_info['experiment'], steps, tr_info['template']
+        )
+        for (tr_id, tr_info) in trajectory_plan.items()
     ]
     return {'trajectories': tr_configs}
 
