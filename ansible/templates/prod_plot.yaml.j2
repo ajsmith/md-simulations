@@ -1,0 +1,4 @@
+quench:
+  suptitle: "{{ trajectory.experiment }} {{ trajectory.trajectory }} - step {{ item.batch }}"
+  input: ../output/abf_quench{{ item.batch }}.out
+  output: "{{ trajectory.experiment }}{{ trajectory.trajectory }}-prod{{ item.batch }}.png"

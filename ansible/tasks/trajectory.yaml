@@ -45,6 +45,21 @@
     mode: 0755
   run_once: yes
 
+- name: Create prod plot configs
+  template:
+    src: prod_plot.yaml.j2
+    dest: "{{ trajectory_dir }}/analysis/prod_plot{{ item.batch }}.yaml"
+    mode: 0644
+  loop: "{{ trajectory.batches }}"
+  run_once: yes
+
+- name: Create prod plot script
+  template:
+    src: make_plots.sh.j2
+    dest: "{{ trajectory_dir }}/make_plots.sh"
+    mode: 0755
+  run_once: yes
+
 - name: Symlink preprod files
   file:
     src: "{{ preprod_dir }}/{{ item }}"

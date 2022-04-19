@@ -20,6 +20,21 @@
     - vars/sim_config.yaml
   tasks:
 
+    - name: Configure ssh
+      copy:
+        dest: "/home/{{ ansible_user }}/.ssh/config"
+        content: |
+          Host github.com
+            StrictHostKeyChecking no
+        mode: 0600
+      run_once: yes
+
+    - name: Clone the md-simulations repo
+      git:
+        repo: git@github.com:ajsmith/md-simulations.git
+        dest: "{{ project_dir }}/md-simulations"
+      run_once: yes
+
     - name: Add directory for pre-production files
       file:
         path: "{{ preprod_dir }}"

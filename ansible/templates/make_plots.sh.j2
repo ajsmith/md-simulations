@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Abort on error
+set -e
+
+cd $(dirname $0)/analysis
+
+{% for batch in trajectory.batches %}
+mdsim-plot --config "prod_plot{{ batch.batch }}.yaml"
+{% endfor %}
