@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Abort on error
+set -e
+
+cd $(dirname $0)
+project_home=$(pwd)
+
+. venv/bin/activate
+
+{% for trajectory in simulation.trajectories %}
+
+echo "Generating plots for {{ trajectory.experiment }} trajectory {{ trajectory.trajectory }}"
+cd ${project_home}/"{{ trajectory.trajectory }}"
+mdsim-plot --config analysis/prod_plot.yaml
+{% endfor %}

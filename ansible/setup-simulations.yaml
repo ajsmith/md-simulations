@@ -65,6 +65,13 @@
         mode: 0755
       run_once: yes
 
+    - name: Create make-plots.sh script
+      template:
+        src: make-plots.sh.j2
+        dest: "{{ project_dir }}/make-plots.sh"
+        mode: 0755
+      run_once: yes
+
     - name: Create run-analysis.sh script
       template:
         src: run-analysis.sh.j2

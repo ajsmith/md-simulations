@@ -1,4 +1,7 @@
 quench:
-  suptitle: "{{ trajectory.experiment }} {{ trajectory.trajectory }} - step {{ item.batch }}"
-  input: ../output/abf_quench{{ item.batch }}.out
-  output: "{{ trajectory.experiment }}{{ trajectory.trajectory }}-prod{{ item.batch }}.png"
+  suptitle: "{{ trajectory.experiment }}, trajectory {{ trajectory.trajectory }}"
+  input:
+{% for batch in trajectory.batches %}
+    - ../output/abf_quench{{ batch.batch }}.out
+{% endfor %}
+  output: "{{ trajectory.experiment }}{{ trajectory.trajectory }}-prod.png"
