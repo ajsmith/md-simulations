@@ -1,1 +1,4 @@
-*
+/md-simulations
+/venv
+*.dcd
+*.dcd.BAK

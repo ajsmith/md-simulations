@@ -13,6 +13,6 @@ fi
 mkdir -p download
 
 rsync ${rsync_opts} \
-      --include-from=${script_dir}/include.txt --exclude='*.*' \
+      --exclude-from=${script_dir}/exclude.txt \
       ${remote_host}:/mdsim/project2/ \
       download
