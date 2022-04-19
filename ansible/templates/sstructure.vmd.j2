@@ -1,0 +1,41 @@
+# load molecule
+{% if trajectory.experiment == 'ibu' %}
+mol new ../abf_solv_ions.psf waitfor all
+{% else %}
+mol new ../abf_solv.psf waitfor all
+{% endif %}
+mol addfile ../output/abf_quench{{ item.batch }}.dcd waitfor all
+
+# number of structures
+set nfr [molinfo top get numframes]
+
+# output file
+{% set output_file_name = 'sstructure-' + trajectory.experiment + trajectory.trajectory + '.dat' %}
+set output_file [open "{{ output_file_name }}" a]
+
+# select CA carbons from protein
+set protCA [atomselect top "segname ABF and name CA"]
+
+# loop over all structures
+for {set fr 0} {$fr < $nfr} {incr fr 1} {
+ # update selection index
+ animate goto $fr
+ display update ui
+ $protCA frame $fr
+ mol ssrecalc top
+
+ # compute secondary structure using STRIDE
+ set ss [$protCA get structure]
+
+ # print secondary structure to output_file
+ puts $output_file $ss
+}
+
+# delete atom selection
+$protCA delete
+
+# close output file
+flush $output_file
+close $output_file
+
+exit

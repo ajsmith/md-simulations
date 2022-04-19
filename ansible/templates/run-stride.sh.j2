@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# Abort on error
+set -e
+
+cd $(dirname $0)
+trajectory_home=$(pwd)
+cd analysis
+
+> sstructure-{{ trajectory.experiment }}{{ trajectory.trajectory }}.dat
+
+{% for batch in trajectory.batches %}
+vmd -dispdev text -eofexit < sstructure{{ batch.batch }}.vmd
+{% endfor %}

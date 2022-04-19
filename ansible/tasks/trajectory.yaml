@@ -5,6 +5,15 @@
     state: directory
     recurse: yes
     mode: 0755
+  run_once: yes
+
+- name: Create analysis directory
+  file:
+    path: "{{ project_dir }}/{{ trajectory.trajectory }}/analysis"
+    state: directory
+    recurse: yes
+    mode: 0755
+  run_once: yes
 
 - name: Create NAMD configuration files
   template:
@@ -12,12 +21,29 @@
     dest: "{{ trajectory_dir }}/abf_quench{{ item.batch }}.namd"
     mode: 0644
   loop: "{{ trajectory.batches }}"
+  run_once: yes
 
 - name: Create batch run script
   template:
     src: run-batch.sh.j2
     dest: "{{ trajectory_dir}}/run-batch.sh"
     mode: 0755
+  run_once: yes
+
+- name: Create STRIDE VMD scripts
+  template:
+    src: sstructure.vmd.j2
+    dest: "{{ trajectory_dir }}/analysis/sstructure{{ item.batch }}.vmd"
+    mode: 0644
+  loop: "{{ trajectory.batches }}"
+  run_once: yes
+
+- name: Create STRIDE run script
+  template:
+    src: run-stride.sh.j2
+    dest: "{{ trajectory_dir}}/run-stride.sh"
+    mode: 0755
+  run_once: yes
 
 - name: Symlink preprod files
   file:
@@ -25,4 +51,5 @@
     dest: "{{ trajectory_dir }}/{{ item }}"
     state: link
   loop: "{{ preprod_files }}"
+  run_once: yes
 ...

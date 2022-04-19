@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# Abort on error
+set -e
+
+cd $(dirname $0)
+project_home=$(pwd)
+
+date
+{% for trajectory in simulation.trajectories %}
+
+echo "Running analysis on trajectory {{ trajectory.trajectory }}"
+cd ${project_home}/"{{ trajectory.trajectory }}"
+./run-stride.sh
+{% endfor %}
+
+echo "Analysis complete!"
+date

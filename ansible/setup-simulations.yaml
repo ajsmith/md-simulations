@@ -4,7 +4,7 @@
   vars:
     project_dir: /mdsim/project2
     cell_size: 35
-    namd_cores: "{{ ansible_processor_nproc }}"
+    namd_cores: 16 #"{{ ansible_processor_nproc }}"
     preprod_files:
       - abf_solv.pdb
       - abf_solv.psf
@@ -25,6 +25,7 @@
         path: "{{ preprod_dir }}"
         state: directory
         mode: 0755
+      run_once: yes
 
     - name: Add pre-production files
       copy:
@@ -32,6 +33,7 @@
         dest: "{{ preprod_dir }}/{{ item }}"
         mode: 0644
       loop: "{{ preprod_files }}"
+      run_once: yes
 
     - include_tasks: tasks/trajectory.yaml
       loop: "{{ simulation.trajectories }}"
@@ -39,10 +41,19 @@
         loop_var: trajectory
       vars:
         trajectory_dir: "{{ project_dir }}/{{ trajectory.trajectory }}"
+      run_once: yes
 
     - name: Create run-sim.sh script
       template:
         src: run-sim.sh.j2
         dest: "{{ project_dir }}/run-sim.sh"
         mode: 0755
+      run_once: yes
+
+    - name: Create run-analysis.sh script
+      template:
+        src: run-analysis.sh.j2
+        dest: "{{ project_dir }}/run-analysis.sh"
+        mode: 0755
+      run_once: yes
 ...
