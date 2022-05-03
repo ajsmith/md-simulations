@@ -6,10 +6,12 @@ mdsim-plot=mdsim.plot_stats:main
 mdsim-cell-size=mdsim.find_cell_size:main
 mdsim-check-coords=mdsim.check_coordinates:main
 mdsim-batch-config=mdsim.batch:main
+mdsim-stride-stats=mdsim.stride:main
 """
 
 package_data = {
     'mdsim.defaults': ['*.yaml'],
+    'test.mdsim': ['*.dat'],
 }
 
 setup(
@@ -27,5 +29,6 @@ setup(
     install_requires=[
         'PyYAML',
         'matplotlib',
+        'numpy',
     ],
 )
