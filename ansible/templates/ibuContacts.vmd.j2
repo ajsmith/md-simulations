@@ -1,0 +1,73 @@
+package require pbctools
+
+# load trajectory
+
+mol new ./abf_solv_ions.psf waitfor all
+
+mol addfile ./abf_quench10.dcd first 0 step 1 waitfor all
+#mol addfile ./abf_quench11.dcd first 0 step 1 waitfor all
+
+pbc wrap -all -center com -centersel protein -sel "not water"
+
+set nfr [molinfo top get numframes]
+
+# open output files
+set outfile [open "ibu_contacts10.11.dat" w]
+
+set prottemp [atomselect top "protein and name CA"]
+set protresidues [$prottemp get residue]
+$prottemp delete
+set ligands [atomselect top "resname IBU2 and name C1"]
+set ligresidues [$ligands get residue]
+$ligands delete
+set lig1res [lindex $ligresidues 0]
+set ligtemp [atomselect top "resname IBU2 and residue $lig1res and noh"]
+set ligatomlist [$ligtemp get name]
+$ligtemp delete
+# loop over all structures
+#plan:
+
+#foreach fr
+#	foreach res
+#		foreach resatom
+#			foreach lig
+#				foreach ligatom
+for {set fr 0} {$fr < $nfr} {incr fr 1} {
+ set contacts {}
+
+ foreach protres $protresidues {
+  set prottemp [atomselect top "protein and residue $protres and noh"]
+  set protatomlist [$prottemp get name]
+  $prottemp delete
+  set rescontacts 0
+  foreach ligres $ligresidues {
+   set ligcontact 0
+   foreach protatom $protatomlist {
+    set prot [atomselect top "protein and residue $protres and name $protatom" frame $fr]
+    set protcom [measure center $prot]
+    $prot delete
+    foreach ligatom $ligatomlist {
+      set lig [atomselect top "resname IBU2 and residue $ligres and name $ligatom" frame $fr]
+      set ligcom [measure center $lig]
+      set dist [vecdist $protcom $ligcom]
+      if {$dist < 4.5} {
+       set ligcontact 1
+       incr rescontacts 1
+       $lig delete
+       break
+      }
+     $lig delete
+    }
+    if {$ligcontact > 0} {
+     break
+    }
+   }
+  }
+  set contacts [lappend contacts $rescontacts]
+ }
+  puts $outfile $contacts
+}
+
+close $outfile
+
+exit
