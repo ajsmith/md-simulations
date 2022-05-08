@@ -106,6 +106,15 @@ def canonicalize_file_paths(root, file_paths):
     return [str((path / fpath).resolve()) for fpath in file_paths]
 
 
+def make_plot(output_file, group_stats):
+    fig, ax = plt.subplots()
+    for (name, st) in group_stats.items():
+        y = st['ts_mean']
+        ax.plot(y[::500], ':', label=name)
+    fig.savefig(output_file)
+    print('Generated plot:', output_file)
+
+
 def main():
     parser = get_parser()
     args = parser.parse_args()
@@ -125,9 +134,4 @@ def main():
         for conf in group_configs
     )
     group_stats = dict((name, stats(data)) for (name, data) in groups.items())
-    fig, ax = plt.subplots()
-    for (name, st) in group_stats.items():
-        y = st['ts_mean']
-        ax.plot(y[::500], ':', label=name)
-    fig.savefig(output_file)
-    print('Generated plot:', output_file)
+    make_plot(output_file, group_stats)
