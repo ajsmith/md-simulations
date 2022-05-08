@@ -60,11 +60,12 @@ def aggregate_group(helices, totals, cols):
 def stats(ts_arrays):
     helices, totals = ts_arrays
     return {
-        'ts_mean': helices / totals,
-        'mean': (helices / totals).mean(),
+        'y': helices / totals,
+        'y_mean': (helices / totals).mean(),
         'var': helices.var(),
-        'N_helix': helices.sum(),
-        'N': totals.sum(),
+        'helix_count': helices.sum(),
+        'structure_count': totals.sum(),
+        'steps': len(totals)
     }
 
 
@@ -106,13 +107,24 @@ def canonicalize_file_paths(root, file_paths):
     return [str((path / fpath).resolve()) for fpath in file_paths]
 
 
+def apply_transforms(stats):
+    result = dict(stats)
+    result['y'] = stats['y'][::500]
+    return result
+
+
 def make_plot(output_file, group_stats):
-    fig, ax = plt.subplots()
-    for (name, st) in group_stats.items():
-        y = st['ts_mean']
-        ax.plot(y[::500], ':', label=name)
+    nrows = len(group_stats)
+    fig, axs = plt.subplots(nrows)
+    for (ax, (name, st)) in zip(axs, group_stats.items()):
+        st = apply_transforms(st)
+        y = st['y']
+        ax.plot(y, label=f"$h_{{{name}}}(t)$", color='b')
+        y_mean = st['y_mean']
+        ax.axhline(y_mean, label=f'$<h_{{{name}}}(t)>$', ls=':', color='m')
+        ax.legend()
     fig.savefig(output_file)
-    print('Generated plot:', output_file)
+    print('Saved plot:', output_file)
 
 
 def main():
