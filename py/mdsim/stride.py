@@ -113,6 +113,10 @@ def main():
 
     stride_file_paths = canonicalize_file_paths(
         args.config, config['stride_files'])
+    (output_file,) = canonicalize_file_paths(
+        args.config,
+        [config.get('output_file', 'sstructure.png')],
+    )
 
     group_configs = config['groups']
     helices, totals = process_files(stride_file_paths)
@@ -125,4 +129,5 @@ def main():
     for (name, st) in group_stats.items():
         y = st['ts_mean']
         ax.plot(y[::500], ':', label=name)
-    fig.savefig('stride.png')
+    fig.savefig(output_file)
+    print('Generated plot:', output_file)
