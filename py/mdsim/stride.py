@@ -120,16 +120,19 @@ def apply_transforms(stats):
     return result
 
 
-def make_plot(output_file, group_stats):
+def make_plot(title, group_stats, output_file):
     nrows = len(group_stats)
-    fig, axs = plt.subplots(nrows)
+    fig, axs = plt.subplots(nrows, sharey=True)
     for (ax, (name, st)) in zip(axs, group_stats.items()):
         st = apply_transforms(st)
         y = st['y']
-        ax.plot(y, label=f"$h_{{{name}}}(t)$", color='b')
+        ax.plot(y, color='b')
         y_mean = st['y_mean']
-        ax.axhline(y_mean, label=f'$<h_{{{name}}}(t)>$', ls=':', color='m')
+        ax.axhline(y_mean, label=f'$<H_{{{name}}}>$', ls=':', color='m')
         ax.legend()
+        ax.set_ylabel(f"$<H_{{{name}}}(t)>$")
+    axs[-1].set_xlabel('t')
+    fig.suptitle(title)
     fig.savefig(output_file)
     print('Saved plot:', output_file)
 
@@ -145,6 +148,7 @@ def main():
         args.config,
         [config.get('output_file', 'sstructure.png')],
     )
+    title = config.get('title', '')
 
     group_configs = config['groups']
     helices, totals = process_files(stride_file_paths)
@@ -153,4 +157,4 @@ def main():
         for conf in group_configs
     )
     group_stats = dict((name, stats(data)) for (name, data) in groups.items())
-    make_plot(output_file, group_stats)
+    make_plot(title, group_stats, output_file)
