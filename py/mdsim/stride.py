@@ -8,6 +8,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import yaml
+from scipy.signal import savgol_filter
 
 
 def process_line(line):
@@ -107,9 +108,15 @@ def canonicalize_file_paths(root, file_paths):
     return [str((path / fpath).resolve()) for fpath in file_paths]
 
 
+def window_transform(x, window_size):
+     k = window_size // 2
+     return np.array([x[i-k:i+k].mean() for i in range(k, len(x), k)])
+
+
 def apply_transforms(stats):
     result = dict(stats)
-    result['y'] = stats['y'][::500]
+    result['y'] = savgol_filter(stats['y'], 100, 1)
+    # result['y'] = window_transform(stats['y'], 100)
     return result
 
 

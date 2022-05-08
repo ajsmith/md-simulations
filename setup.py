@@ -30,5 +30,6 @@ setup(
         'PyYAML',
         'matplotlib',
         'numpy',
+        'scipy',
     ],
 )
