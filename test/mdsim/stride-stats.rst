@@ -61,18 +61,20 @@ Generating STRIDE Statistics
     >>> ibu_stats = stats(ibu)
     >>> for (k, v) in ibu_stats.items():
     ...     print(f'{k}:', v)
-    ts_mean: [0.85714286 0.85714286 0.85714286 0.85714286 0.85714286 0.85714286
+    y: [0.85714286 0.85714286 0.85714286 0.85714286 0.85714286 0.85714286
      0.85714286 0.85714286 0.85714286 0.85714286]
-    mean: 12.0
+    y_mean: 0.8571428571428571
     var: 0.0
-    N_helix: 120
-    N: 140
+    helix_count: 120
+    structure_count: 140
+    steps: 10
     >>> water_stats = stats(water)
     >>> for (k, v) in water_stats.items():
     ...     print(f'{k}:', v)
-    ts_mean: [0.85714286 0.42857143 0.85714286 0.85714286 0.85714286 0.42857143
+    y: [0.85714286 0.42857143 0.85714286 0.85714286 0.85714286 0.42857143
      0.42857143 0.42857143 0.         0.42857143]
-    mean: 7.8
+    y_mean: 0.5571428571428572
     var: 14.76
-    N_helix: 78
-    N: 140
+    helix_count: 78
+    structure_count: 140
+    steps: 10
