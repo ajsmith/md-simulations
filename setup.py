@@ -30,6 +30,7 @@ setup(
         'PyYAML',
         'matplotlib',
         'numpy',
+        'pandas',
         'scipy',
     ],
 )

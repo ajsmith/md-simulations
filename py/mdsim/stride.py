@@ -120,6 +120,11 @@ def apply_transforms(stats):
     return result
 
 
+def smooth(x):
+    return savgol_filter(x, 100, 1)
+    # return window_transform(x, 100)
+
+
 def make_plot(title, group_stats, output_file):
     nrows = len(group_stats)
     fig, axs = plt.subplots(nrows, sharey=True)
@@ -137,6 +142,41 @@ def make_plot(title, group_stats, output_file):
     print('Saved plot:', output_file)
 
 
+def helix_denature_time(helix_content, helix_fraction=0.4):
+    result = 0
+    for t, content in enumerate(helix_content):
+        if content > 0.4:
+            result = t
+    return result
+
+
+def plot_trajectory_helix_content(
+        experiment, trajectory, helices, totals, output_file):
+    ncols = 2
+    y_raw = helices / totals
+    y_smooth = smooth(y_raw)
+    y_mean = y_raw.mean()
+    t_denatured = helix_denature_time(y_smooth)
+    helix_mean = y_raw[:t_denatured].mean()
+    denatured_mean = y_raw[t_denatured:].mean()
+    # print(y_mean, t_denatured, output_file)
+    # print(f'{t_denatured}: {y_mean:.3f} {helix_mean:.3f} {denatured_mean:.3f}')
+    fig, (ax1, ax2) = plt.subplots(nrows=2)
+    ax1.plot(y_smooth, lw=0.5)
+    ax1.set_ylabel(f"$<H_{{{trajectory}}}(t)>$")
+    ax2.plot(y_raw, lw=0.5)
+    ax2.set_ylabel(f"$<H_{{{trajectory}}}(t)> (raw)$")
+    ax2.set_xlabel('t')
+    for ax in (ax1, ax2):
+        ax.axhline(y_mean, label=f'$<H_{{{trajectory}}}>$', lw=0.6, ls=':', color='m')
+        ax.axvline(t_denatured, label=f'$t_{{h}}$', lw=0.6, ls=':', color='g')
+        ax.set_ylim(ymax=1.2)
+        ax.legend()
+    fig.suptitle(f'Trajectory {trajectory}: {experiment} - Helix content (%)')
+    fig.savefig(output_file)
+    print('Saved plot:', output_file)
+
+
 def main():
     parser = get_parser()
     args = parser.parse_args()
@@ -148,13 +188,28 @@ def main():
         args.config,
         [config.get('output_file', 'sstructure.png')],
     )
+    output_dir_path = Path(config['output_dir'])
     title = config.get('title', '')
 
     group_configs = config['groups']
     helices, totals = process_files(stride_file_paths)
+
+    for group_config in group_configs:
+        group_name = group_config['name']
+        cols = group_config['cols']
+        trajectories = group_config['trajectories']
+        # nrows = len(cols)
+        # ncols = 2
+        for (col, trajectory) in zip(cols, trajectories):
+            output_file = output_dir_path / f'stride-{group_name}-{trajectory}.png'
+            plot_trajectory_helix_content(
+                group_name, trajectory, helices[col], totals[col], output_file
+            )
+
     groups = dict(
         (conf['name'], aggregate_group(helices, totals, conf['cols']))
         for conf in group_configs
     )
     group_stats = dict((name, stats(data)) for (name, data) in groups.items())
-    make_plot(title, group_stats, output_file)
+    # plot_raw('Trajectory 01', 'ibu', helices[0], totals[0], output_file)
+    # make_plot(title, group_stats, output_file)
