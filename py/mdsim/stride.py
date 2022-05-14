@@ -78,6 +78,22 @@ def process_contact_files(file_paths):
     return np.array(contact_vecs, dtype=np.uint)
 
 
+def mean_residue_contact_frequency(contacts):
+    return contacts.mean(axis=0)
+
+def total_mean_residue_contact_frequency(contacts):
+    x = np.array([mean_residue_contact_frequency(c) for c in contacts])
+    return x.mean(axis=0)
+
+def split_timeline(x, t_h):
+    return (x[:t_h], x[t_h:])
+
+def split_timeline_all(xs, t_h):
+    timeline_pairs = [split_timeline(x, t_h) for x in xs]
+    xs_initial = np.array([pair[0] for pair in timeline_pairs])
+    xs_final = np.array([pair[1] for pair in timeline_pairs])
+    return (xs_initial, xs_final)
+
 def group_sum(matrix, cols):
     return matrix[cols].sum(axis=0)
 
@@ -122,15 +138,8 @@ def load_config(filepath=None):
     else:
         with open(filepath) as f:
             config = yaml.load(f, yaml.Loader)
+        config['config_path'] = filepath
     return config
-
-
-def get_file_path(config, filepath):
-    path = Path(config['config_path'])
-    if path.is_file():
-        path = path.parent
-    path = path / filepath
-    return path.resolve()
 
 
 def canonicalize_file_paths(root, file_paths):
@@ -205,6 +214,15 @@ def plot_trajectory_helix_content(experiment, trajectory, y_raw, output_file):
     fig.suptitle(f'Trajectory {trajectory}: {experiment} - Helix content (%)')
     fig.savefig(output_file)
     print('Saved plot:', output_file)
+
+
+def plot_contacts(args):
+    kaboom
+
+
+def analyze_contacts_data(config):
+    contact_file_paths = canonicalize_file_paths()
+    kaboom
 
 
 def main():

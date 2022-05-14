@@ -174,3 +174,63 @@ Contacts
            [1, 1, 0, 0, 1, 0, 1],
            [1, 1, 0, 0, 1, 1, 0],
            [1, 1, 0, 0, 1, 1, 1]], dtype=uint64)
+
+    >>> from mdsim.stride import mean_residue_contact_frequency
+    >>> mean_residue_contact_frequency(c1)
+    array([1. , 1. , 2. , 0.8, 0.6, 0.5, 0.5])
+    >>> mean_residue_contact_frequency(c2)
+    array([1. , 0.8, 0.6, 0.4, 0.4, 0.6, 0.6])
+
+    >>> from mdsim.stride import total_mean_residue_contact_frequency
+    >>> total_mean_residue_contact_frequency(contacts)
+    array([1.  , 0.9 , 1.3 , 0.6 , 0.5 , 0.55, 0.55])
+
+    >>> from mdsim.stride import split_timeline
+    >>> c1_initial, c1_final = split_timeline(c1, 5)
+    >>> c1_initial
+    array([[1, 1, 2, 0, 0, 1, 1],
+           [1, 1, 2, 0, 1, 0, 0],
+           [1, 1, 2, 1, 0, 0, 0],
+           [1, 1, 2, 1, 0, 0, 1],
+           [1, 1, 2, 1, 0, 1, 0]], dtype=uint64)
+    >>> c1_final
+    array([[1, 1, 2, 1, 0, 1, 1],
+           [1, 1, 2, 1, 1, 0, 0],
+           [1, 1, 2, 1, 1, 1, 0],
+           [1, 1, 2, 1, 1, 1, 1],
+           [1, 1, 2, 1, 2, 0, 1]], dtype=uint64)
+
+    >>> from mdsim.stride import split_timeline_all
+    >>> contacts_initial, contacts_final = split_timeline_all(contacts, 5)
+    >>> contacts_initial.shape
+    (2, 5, 7)
+    >>> contacts_initial
+    array([[[1, 1, 2, 0, 0, 1, 1],
+            [1, 1, 2, 0, 1, 0, 0],
+            [1, 1, 2, 1, 0, 0, 0],
+            [1, 1, 2, 1, 0, 0, 1],
+            [1, 1, 2, 1, 0, 1, 0]],
+    <BLANKLINE>
+           [[1, 0, 3, 2, 0, 1, 0],
+            [1, 0, 3, 2, 0, 1, 2],
+            [1, 1, 0, 0, 0, 0, 0],
+            [1, 1, 0, 0, 0, 0, 1],
+            [1, 1, 0, 0, 0, 1, 0]]], dtype=uint64)
+    >>> contacts_final.shape
+    (2, 5, 7)
+    >>> contacts_final
+    array([[[1, 1, 2, 1, 0, 1, 1],
+            [1, 1, 2, 1, 1, 0, 0],
+            [1, 1, 2, 1, 1, 1, 0],
+            [1, 1, 2, 1, 1, 1, 1],
+            [1, 1, 2, 1, 2, 0, 1]],
+    <BLANKLINE>
+           [[1, 1, 0, 0, 0, 1, 1],
+            [1, 1, 0, 0, 1, 0, 0],
+            [1, 1, 0, 0, 1, 0, 1],
+            [1, 1, 0, 0, 1, 1, 0],
+            [1, 1, 0, 0, 1, 1, 1]]], dtype=uint64)
+    >>> total_mean_residue_contact_frequency(contacts_initial)
+    array([1. , 0.8, 1.6, 0.7, 0.1, 0.5, 0.5])
+    >>> total_mean_residue_contact_frequency(contacts_final)
+    array([1. , 1. , 1. , 0.5, 0.9, 0.6, 0.6])
