@@ -54,8 +54,12 @@ def process_files(file_paths):
     return np.vstack(helices), np.vstack(totals)
 
 
+def sum_group(matrix, cols):
+    return matrix[cols].sum(axis=0)
+
+
 def aggregate_group(helices, totals, cols):
-    return np.vstack((helices[cols].sum(axis=0), totals[cols].sum(axis=0)))
+    return np.vstack((sum_group(helices, cols), sum_group(totals, cols)))
 
 
 def stats(ts_arrays):
