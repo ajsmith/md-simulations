@@ -202,8 +202,6 @@ def plot_trajectory_helix_content(experiment, trajectory, y_raw, output_file):
     t_denatured = helix_denature_time(y_smooth)
     helix_mean = y_raw[:t_denatured].mean()
     denatured_mean = y_raw[t_denatured:].mean()
-    # print(y_mean, t_denatured, output_file)
-    # print(f'{t_denatured}: {y_mean:.3f} {helix_mean:.3f} {denatured_mean:.3f}')
     fig, (ax1, ax2) = plt.subplots(nrows=2)
     ax1.plot(y_smooth, lw=1)
     ax1.set_ylabel(f"$<H_{{{trajectory}}}(t)>$")
@@ -212,7 +210,7 @@ def plot_trajectory_helix_content(experiment, trajectory, y_raw, output_file):
     ax2.set_xlabel('t')
     for ax in (ax1, ax2):
         ax.axhline(y_mean, label=f'$<H_{{{trajectory}}}>$', lw=0.6, ls=':', color='m')
-        ax.axvline(t_denatured, label=f'$t_{{h}}$', lw=0.6, ls=':', color='g')
+        ax.axvline(t_denatured, label=f'$t_{{h,{trajectory}}}$', lw=0.6, ls=':', color='g')
         ax.set_ylim(ymax=1.2)
         ax.legend()
     fig.suptitle(f'Trajectory {trajectory}: {experiment} - Helix content (%)')
@@ -222,7 +220,6 @@ def plot_trajectory_helix_content(experiment, trajectory, y_raw, output_file):
 def plot_contacts(y_all, y_initial, y_final):
     fig, ax = plt.subplots()
     x = list(range(1, len(y_all) + 1))
-    # y_mean = y_all.mean()
     ys = (y_all, y_initial, y_final)
     labels = ('$<C_{all}>$', '$<C_{initial}>$', '$<C_{final}>$')
     for (y, label) in zip(ys, labels):
@@ -251,6 +248,21 @@ def analyze_contacts(config, t_h):
     save_plot(fig, output_file)
 
 
+def calculate_t_h(group_configs, helices_pcts):
+    result = {}
+    result['t_h'] = t_h = np.array([
+        helix_denature_time(smooth(x)) for x in helices_pcts
+    ])
+    result['t_h_mean'] = t_h.mean()
+    for group_config in group_configs:
+        name = group_config['name']
+        cols = group_config['cols']
+        trajectories = group_config['trajectories']
+        result[f'{name}_t_h'] = t_h[cols]
+        result[f'{name}_t_h_mean'] = group_mean(t_h, cols)
+    return result
+
+
 def main():
     parser = get_parser()
     args = parser.parse_args()
@@ -267,30 +279,28 @@ def main():
 
     group_configs = config['groups']
     helices, totals, helices_pcts = process_files(stride_file_paths)
-    t_hs = np.array([
-        helix_denature_time(smooth(x)) for x in helices_pcts
-    ])
-    print(t_hs)
-    t_h_mean = t_hs.mean()
-
+    t_h_data = calculate_t_h(group_configs, helices_pcts)
+    t_h_mean = t_h_data['t_h_mean']
+    print(t_h_data['t_h'])
     print(f'Average t_h: {t_h_mean:.3f} ps')
+
     for group_config in group_configs:
         group_name = group_config['name']
         cols = group_config['cols']
         trajectories = group_config['trajectories']
-        group_t_h_mean = group_mean(t_hs, cols)
+        group_t_h_mean = t_h_data[f'{group_name}_t_h_mean']
         print(f'{group_name} t_h average: {group_t_h_mean:.3f} ps')
         for (col, trajectory) in zip(cols, trajectories):
-            output_file = output_dir_path / f'stride-{group_name}-{trajectory}.png'
+            file_name = f'stride-{group_name}-{trajectory}.png'
+            output_file_path = output_dir_path / file_name
             plot_trajectory_helix_content(
-                group_name, trajectory, helices_pcts[col], output_file)
+                group_name, trajectory, helices_pcts[col], output_file_path)
 
     groups = dict(
         (conf['name'], aggregate_group(helices, totals, conf['cols']))
         for conf in group_configs
     )
     group_stats = dict((name, stats(data)) for (name, data) in groups.items())
-    # plot_raw('Trajectory 01', 'ibu', helices[0], totals[0], output_file)
     make_plot(title, group_stats, output_dir_path / 'sstruture.png')
-    ibu_t_h = 10220
+    ibu_t_h = int(t_h_data['ibu_t_h_mean'])
     analyze_contacts(config, ibu_t_h)
