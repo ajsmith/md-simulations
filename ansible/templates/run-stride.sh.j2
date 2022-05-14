@@ -7,8 +7,12 @@ cd $(dirname $0)
 trajectory_home=$(pwd)
 cd analysis
 
+echo "Running STRIDE analysis in $(pwd)"
+
+# Wipe old results
 > sstructure-{{ trajectory.experiment }}{{ trajectory.trajectory }}.dat
 
+# Run VMD scripts
 {% for batch in trajectory.batches %}
 vmd -dispdev text -eofexit < sstructure{{ batch.batch }}.vmd
 {% endfor %}

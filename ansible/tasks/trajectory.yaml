@@ -45,6 +45,28 @@
     mode: 0755
   run_once: yes
 
+- name: Create ibuContacts VMD scripts
+  template:
+    src: ibuContacts.vmd.j2
+    dest: "{{ trajectory_dir }}/analysis/ibuContacts.vmd"
+    mode: 0644
+  run_once: yes
+  when: trajectory.experiment == "ibu"
+  vars:
+    output_file: >-
+      ibuContacts_{{ trajectory.trajectory }}.dat
+
+- name: Create ibuContacts run script
+  template:
+    src: run-ibuContacts.sh.j2
+    dest: "{{ trajectory_dir}}/run-ibuContacts.sh"
+    mode: 0755
+  run_once: yes
+  when: trajectory.experiment == "ibu"
+  vars:
+    output_file: >-
+      ibuContacts_{{ trajectory.trajectory }}.dat
+
 - name: Create prod plot config
   template:
     src: prod_plot.yaml.j2

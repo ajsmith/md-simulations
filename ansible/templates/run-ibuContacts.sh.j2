@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# Abort on error
+set -e
+
+echo "Running ibuContacts analysis in $(pwd)"
+cd $(dirname $0)/analysis
+vmd -dispdev text -eofexit < ibuContacts.vmd

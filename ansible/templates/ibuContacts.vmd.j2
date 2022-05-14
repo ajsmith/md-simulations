@@ -2,17 +2,19 @@ package require pbctools
 
 # load trajectory
 
-mol new ./abf_solv_ions.psf waitfor all
+mol new ../abf_solv_ions.psf waitfor all
 
-mol addfile ./abf_quench10.dcd first 0 step 1 waitfor all
-#mol addfile ./abf_quench11.dcd first 0 step 1 waitfor all
+{% for batch in trajectory.batches %}
+mol addfile ../output/abf_quench{{ batch.batch }}.dcd first 0 step 1 waitfor all
+{% endfor %}
+#mol addfile ./abf_quenchXX.dcd first 0 step 1 waitfor all
 
 pbc wrap -all -center com -centersel protein -sel "not water"
 
 set nfr [molinfo top get numframes]
 
 # open output files
-set outfile [open "ibu_contacts10.11.dat" w]
+set outfile [open "{{ output_file }}" w]
 
 set prottemp [atomselect top "protein and name CA"]
 set protresidues [$prottemp get residue]

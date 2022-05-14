@@ -12,6 +12,9 @@ date
 echo "Running analysis on trajectory {{ trajectory.trajectory }}"
 cd ${project_home}/"{{ trajectory.trajectory }}"
 ./run-stride.sh
+{% if trajectory.experiment == "ibu" %}
+./run-ibuContacts.sh
+{% endif %}
 {% endfor %}
 
 echo "Analysis complete!"
