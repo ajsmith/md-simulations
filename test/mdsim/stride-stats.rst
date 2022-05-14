@@ -23,14 +23,17 @@ Generating STRIDE Statistics
 
     >>> from mdsim.stride import process_file
     >>> file_paths = getfixture('stride_file_paths')
-    >>> helices, totals = process_file(file_paths[0])
+    >>> helices, totals, helices_pcts = process_file(file_paths[0])
     >>> helices
     array([6, 6, 6, 6, 6, 6, 6, 6, 6, 6], dtype=uint64)
     >>> totals
     array([7, 7, 7, 7, 7, 7, 7, 7, 7, 7], dtype=uint64)
+    >>> helices_pcts
+    array([0.85714286, 0.85714286, 0.85714286, 0.85714286, 0.85714286,
+           0.85714286, 0.85714286, 0.85714286, 0.85714286, 0.85714286])
 
     >>> from mdsim.stride import process_files
-    >>> helices, totals = process_files(file_paths)
+    >>> helices, totals, helices_pcts = process_files(file_paths)
     >>> helices.shape
     (4, 10)
     >>> totals.shape
@@ -45,6 +48,15 @@ Generating STRIDE Statistics
            [7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
            [7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
            [7, 7, 7, 7, 7, 7, 7, 7, 7, 7]], dtype=uint64)
+    >>> helices_pcts
+    array([[0.85714286, 0.85714286, 0.85714286, 0.85714286, 0.85714286,
+            0.85714286, 0.85714286, 0.85714286, 0.85714286, 0.85714286],
+           [0.85714286, 0.85714286, 0.85714286, 0.85714286, 0.85714286,
+            0.85714286, 0.85714286, 0.85714286, 0.85714286, 0.85714286],
+           [0.85714286, 0.85714286, 0.85714286, 0.85714286, 0.85714286,
+            0.        , 0.        , 0.        , 0.        , 0.        ],
+           [0.85714286, 0.        , 0.85714286, 0.85714286, 0.85714286,
+            0.85714286, 0.85714286, 0.85714286, 0.        , 0.85714286]])
 
 
     >>> from mdsim.stride import aggregate_group
@@ -56,6 +68,24 @@ Generating STRIDE Statistics
     >>> water
     array([[12,  6, 12, 12, 12,  6,  6,  6,  0,  6],
            [14, 14, 14, 14, 14, 14, 14, 14, 14, 14]], dtype=uint64)
+
+    >>> from mdsim.stride import group_sum
+    >>> ibu_group = [0, 1]
+    >>> water_group = [2, 3]
+    >>> group_sum(helices, ibu_group)
+    array([12, 12, 12, 12, 12, 12, 12, 12, 12, 12], dtype=uint64)
+    >>> group_sum(helices, water_group)
+    array([12,  6, 12, 12, 12,  6,  6,  6,  0,  6], dtype=uint64)
+
+    >>> from mdsim.stride import group_mean
+    >>> group_mean(helices, ibu_group)
+    array([6., 6., 6., 6., 6., 6., 6., 6., 6., 6.])
+    >>> group_mean(helices_pcts, ibu_group)
+    array([0.85714286, 0.85714286, 0.85714286, 0.85714286, 0.85714286,
+           0.85714286, 0.85714286, 0.85714286, 0.85714286, 0.85714286])
+    >>> group_mean(helices_pcts, water_group)
+    array([0.85714286, 0.42857143, 0.85714286, 0.85714286, 0.85714286,
+           0.42857143, 0.42857143, 0.42857143, 0.        , 0.42857143])
 
     >>> from mdsim.stride import stats
     >>> ibu_stats = stats(ibu)

@@ -39,7 +39,7 @@ def process_file(file_path):
             ts_all.append(count_all(structures))
     helices = np.array(ts_helix, dtype=np.uint)
     totals = np.array(ts_all, dtype=np.uint)
-    return np.vstack((helices, totals))
+    return (helices, totals, helices / totals)
 
 
 def process_files(file_paths):
@@ -47,19 +47,25 @@ def process_files(file_paths):
 
     helices = []
     totals = []
+    helices_pcts = []
     for fpath in file_paths:
-        ts_helix, ts_all = process_file(fpath)
+        ts_helix, ts_all, ts_pcts = process_file(fpath)
         helices.append(ts_helix)
         totals.append(ts_all)
-    return np.vstack(helices), np.vstack(totals)
+        helices_pcts.append(ts_pcts)
+    return (np.vstack(helices), np.vstack(totals), np.vstack(helices_pcts))
 
 
-def sum_group(matrix, cols):
+def group_sum(matrix, cols):
     return matrix[cols].sum(axis=0)
 
 
+def group_mean(matrix, cols):
+    return matrix[cols].mean(axis=0)
+
+
 def aggregate_group(helices, totals, cols):
-    return np.vstack((sum_group(helices, cols), sum_group(totals, cols)))
+    return np.vstack((group_sum(helices, cols), group_sum(totals, cols)))
 
 
 def stats(ts_arrays):
@@ -154,10 +160,8 @@ def helix_denature_time(helix_content, helix_fraction=0.4):
     return result
 
 
-def plot_trajectory_helix_content(
-        experiment, trajectory, helices, totals, output_file):
+def plot_trajectory_helix_content(experiment, trajectory, y_raw, output_file):
     ncols = 2
-    y_raw = helices / totals
     y_smooth = smooth(y_raw)
     y_mean = y_raw.mean()
     t_denatured = helix_denature_time(y_smooth)
@@ -166,9 +170,9 @@ def plot_trajectory_helix_content(
     # print(y_mean, t_denatured, output_file)
     # print(f'{t_denatured}: {y_mean:.3f} {helix_mean:.3f} {denatured_mean:.3f}')
     fig, (ax1, ax2) = plt.subplots(nrows=2)
-    ax1.plot(y_smooth, lw=0.5)
+    ax1.plot(y_smooth, lw=1)
     ax1.set_ylabel(f"$<H_{{{trajectory}}}(t)>$")
-    ax2.plot(y_raw, lw=0.5)
+    ax2.plot(y_raw, lw=1)
     ax2.set_ylabel(f"$<H_{{{trajectory}}}(t)> (raw)$")
     ax2.set_xlabel('t')
     for ax in (ax1, ax2):
@@ -196,19 +200,24 @@ def main():
     title = config.get('title', '')
 
     group_configs = config['groups']
-    helices, totals = process_files(stride_file_paths)
+    helices, totals, helices_pcts = process_files(stride_file_paths)
+    t_hs = np.array([
+        helix_denature_time(smooth(x)) for x in helices_pcts
+    ])
+    print(t_hs)
+    t_h_mean = t_hs.mean()
 
+    print(f'Average t_h: {t_h_mean:.3f} ps')
     for group_config in group_configs:
         group_name = group_config['name']
         cols = group_config['cols']
         trajectories = group_config['trajectories']
-        # nrows = len(cols)
-        # ncols = 2
+        group_t_h_mean = group_mean(t_hs, cols)
+        print(f'{group_name} t_h average: {group_t_h_mean:.3f} ps')
         for (col, trajectory) in zip(cols, trajectories):
             output_file = output_dir_path / f'stride-{group_name}-{trajectory}.png'
             plot_trajectory_helix_content(
-                group_name, trajectory, helices[col], totals[col], output_file
-            )
+                group_name, trajectory, helices_pcts[col], output_file)
 
     groups = dict(
         (conf['name'], aggregate_group(helices, totals, conf['cols']))
@@ -216,4 +225,4 @@ def main():
     )
     group_stats = dict((name, stats(data)) for (name, data) in groups.items())
     # plot_raw('Trajectory 01', 'ibu', helices[0], totals[0], output_file)
-    # make_plot(title, group_stats, output_file)
+    make_plot(title, group_stats, output_dir_path / 'sstruture.png')
