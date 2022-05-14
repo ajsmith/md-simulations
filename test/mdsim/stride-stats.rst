@@ -1,7 +1,10 @@
 ============================
-Generating STRIDE Statistics
+Analyzing simulation results
 ============================
 
+
+STRIDE
+======
 
     >>> from mdsim.stride import process_line
     >>> structures = process_line('H H H H T T C\n')
@@ -108,3 +111,66 @@ Generating STRIDE Statistics
     helix_count: 78
     structure_count: 140
     steps: 10
+
+
+Contacts
+========
+
+    >>> from mdsim.stride import process_contact_line
+    >>> process_contact_line('1 2 3 4\n')
+    [1, 2, 3, 4]
+
+    >>> from mdsim.stride import process_contact_file
+    >>> file_paths = getfixture('contact_file_paths')
+    >>> for row in process_contact_file(file_paths[0]):
+    ...     print(row)
+    [1, 1, 2, 0, 0, 1, 1]
+    [1, 1, 2, 0, 1, 0, 0]
+    [1, 1, 2, 1, 0, 0, 0]
+    [1, 1, 2, 1, 0, 0, 1]
+    [1, 1, 2, 1, 0, 1, 0]
+    [1, 1, 2, 1, 0, 1, 1]
+    [1, 1, 2, 1, 1, 0, 0]
+    [1, 1, 2, 1, 1, 1, 0]
+    [1, 1, 2, 1, 1, 1, 1]
+    [1, 1, 2, 1, 2, 0, 1]
+    >>> for row in process_contact_file(file_paths[1]):
+    ...     print(row)
+    [1, 0, 3, 2, 0, 1, 0]
+    [1, 0, 3, 2, 0, 1, 2]
+    [1, 1, 0, 0, 0, 0, 0]
+    [1, 1, 0, 0, 0, 0, 1]
+    [1, 1, 0, 0, 0, 1, 0]
+    [1, 1, 0, 0, 0, 1, 1]
+    [1, 1, 0, 0, 1, 0, 0]
+    [1, 1, 0, 0, 1, 0, 1]
+    [1, 1, 0, 0, 1, 1, 0]
+    [1, 1, 0, 0, 1, 1, 1]
+
+    >>> from mdsim.stride import process_contact_files
+    >>> contacts = process_contact_files(file_paths)
+    >>> contacts.shape
+    (2, 10, 7)
+    >>> c1, c2 = contacts
+    >>> c1
+    array([[1, 1, 2, 0, 0, 1, 1],
+           [1, 1, 2, 0, 1, 0, 0],
+           [1, 1, 2, 1, 0, 0, 0],
+           [1, 1, 2, 1, 0, 0, 1],
+           [1, 1, 2, 1, 0, 1, 0],
+           [1, 1, 2, 1, 0, 1, 1],
+           [1, 1, 2, 1, 1, 0, 0],
+           [1, 1, 2, 1, 1, 1, 0],
+           [1, 1, 2, 1, 1, 1, 1],
+           [1, 1, 2, 1, 2, 0, 1]], dtype=uint64)
+    >>> c2
+    array([[1, 0, 3, 2, 0, 1, 0],
+           [1, 0, 3, 2, 0, 1, 2],
+           [1, 1, 0, 0, 0, 0, 0],
+           [1, 1, 0, 0, 0, 0, 1],
+           [1, 1, 0, 0, 0, 1, 0],
+           [1, 1, 0, 0, 0, 1, 1],
+           [1, 1, 0, 0, 1, 0, 0],
+           [1, 1, 0, 0, 1, 0, 1],
+           [1, 1, 0, 0, 1, 1, 0],
+           [1, 1, 0, 0, 1, 1, 1]], dtype=uint64)

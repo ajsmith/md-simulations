@@ -56,6 +56,28 @@ def process_files(file_paths):
     return (np.vstack(helices), np.vstack(totals), np.vstack(helices_pcts))
 
 
+def process_contact_line(line):
+    """Return the contact counts for a line of ibuContacts data."""
+    return [int(field) for field in line.split()]
+
+
+def process_contact_file(file_path):
+    ts_contacts = []
+    with open(file_path) as f:
+        for line in f.readlines():
+            ts_contacts.append(process_contact_line(line))
+    return ts_contacts
+
+
+def process_contact_files(file_paths):
+    assert len(file_paths) > 0, 'No files given'
+
+    contact_vecs = []
+    for fpath in file_paths:
+        contact_vecs.append(process_contact_file(fpath))
+    return np.array(contact_vecs, dtype=np.uint)
+
+
 def group_sum(matrix, cols):
     return matrix[cols].sum(axis=0)
 
