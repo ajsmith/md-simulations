@@ -216,14 +216,47 @@ def plot_trajectory_helix_content(experiment, trajectory, y_raw, output_file):
     print('Saved plot:', output_file)
 
 
-def plot_contacts(args):
-    kaboom
+def plot_contacts(contacts, title, output_file):
+    fig, ax = plt.subplots()
+    y = total_mean_residue_contact_frequency(contacts)
+    x = list(range(1, len(y) + 1))
+    y_mean = y.mean()
+    ax.scatter(x, y)
+    ax.axhline(y_mean, label='<C>', ls=':', c='m')
+    ax.set_ylabel('<C(i)>')
+    ax.set_xlabel('i')
+    ax.legend()
+    fig.suptitle(title)
+    fig.savefig(output_file)
+    print('Saved plot:', output_file)
 
 
-def analyze_contacts_data(config):
-    contact_file_paths = canonicalize_file_paths()
-    kaboom
-
+def analyze_contacts(config, t_h):
+    contact_file_paths = canonicalize_file_paths(
+        config['config_path'],
+        config['ibuContact_files'],
+    )
+    output_dir_path = Path(config['output_dir'])
+    contacts = process_contact_files(contact_file_paths)
+    contacts_initial, contacts_final = split_timeline_all(contacts, 1000)#t_h)
+    plot_contacts(
+        contacts,
+        'Residue-to-Ibuprofin Contacts - Overall',
+        output_dir_path / 'contacts.png',
+    )
+    plot_contacts(
+        contacts_initial,
+        'Residue-to-Ibuprofin Contacts - Initial phase',
+        output_dir_path / 'contacts-initial.png',
+    )
+    plot_contacts(
+        contacts_final,
+        'Residue-to-Ibuprofin Contacts - Final phase',
+        output_dir_path / 'contacts-final.png',
+    )
+    print(total_mean_residue_contact_frequency(contacts))
+    print(total_mean_residue_contact_frequency(contacts_initial))
+    print(total_mean_residue_contact_frequency(contacts_final))
 
 def main():
     parser = get_parser()
@@ -266,3 +299,5 @@ def main():
     group_stats = dict((name, stats(data)) for (name, data) in groups.items())
     # plot_raw('Trajectory 01', 'ibu', helices[0], totals[0], output_file)
     make_plot(title, group_stats, output_dir_path / 'sstruture.png')
+    ibu_t_h = 10220
+    analyze_contacts(config, ibu_t_h)
