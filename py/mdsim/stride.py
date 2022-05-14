@@ -166,6 +166,11 @@ def smooth(x):
     # return window_transform(x, 100)
 
 
+def save_plot(fig, output_file):
+    fig.savefig(output_file)
+    print('Saved plot:', output_file)
+
+
 def make_plot(title, group_stats, output_file):
     nrows = len(group_stats)
     fig, axs = plt.subplots(nrows, sharey=True)
@@ -179,8 +184,7 @@ def make_plot(title, group_stats, output_file):
         ax.set_ylabel(f"$<H_{{{name}}}(t)>$")
     axs[-1].set_xlabel('t')
     fig.suptitle(title)
-    fig.savefig(output_file)
-    print('Saved plot:', output_file)
+    save_plot(fig, output_file)
 
 
 def helix_denature_time(helix_content, helix_fraction=0.4):
@@ -212,23 +216,21 @@ def plot_trajectory_helix_content(experiment, trajectory, y_raw, output_file):
         ax.set_ylim(ymax=1.2)
         ax.legend()
     fig.suptitle(f'Trajectory {trajectory}: {experiment} - Helix content (%)')
-    fig.savefig(output_file)
-    print('Saved plot:', output_file)
+    save_plot(fig, output_file)
 
 
-def plot_contacts(contacts, title, output_file):
+def plot_contacts(y_all, y_initial, y_final):
     fig, ax = plt.subplots()
-    y = total_mean_residue_contact_frequency(contacts)
-    x = list(range(1, len(y) + 1))
-    y_mean = y.mean()
-    ax.scatter(x, y)
-    ax.axhline(y_mean, label='<C>', ls=':', c='m')
+    x = list(range(1, len(y_all) + 1))
+    # y_mean = y_all.mean()
+    ys = (y_all, y_initial, y_final)
+    labels = ('$<C_{all}>$', '$<C_{initial}>$', '$<C_{final}>$')
+    for (y, label) in zip(ys, labels):
+        ax.plot(x, y, marker='o', lw=1, label=label)
     ax.set_ylabel('<C(i)>')
     ax.set_xlabel('i')
     ax.legend()
-    fig.suptitle(title)
-    fig.savefig(output_file)
-    print('Saved plot:', output_file)
+    return fig
 
 
 def analyze_contacts(config, t_h):
@@ -237,26 +239,17 @@ def analyze_contacts(config, t_h):
         config['ibuContact_files'],
     )
     output_dir_path = Path(config['output_dir'])
+    output_file = output_dir_path / 'contacts.png'
+    title = 'Average Ibuprofin Contacts'
     contacts = process_contact_files(contact_file_paths)
-    contacts_initial, contacts_final = split_timeline_all(contacts, 1000)#t_h)
-    plot_contacts(
-        contacts,
-        'Residue-to-Ibuprofin Contacts - Overall',
-        output_dir_path / 'contacts.png',
-    )
-    plot_contacts(
-        contacts_initial,
-        'Residue-to-Ibuprofin Contacts - Initial phase',
-        output_dir_path / 'contacts-initial.png',
-    )
-    plot_contacts(
-        contacts_final,
-        'Residue-to-Ibuprofin Contacts - Final phase',
-        output_dir_path / 'contacts-final.png',
-    )
-    print(total_mean_residue_contact_frequency(contacts))
-    print(total_mean_residue_contact_frequency(contacts_initial))
-    print(total_mean_residue_contact_frequency(contacts_final))
+    contacts_initial, contacts_final = split_timeline_all(contacts, t_h)
+    y_all = total_mean_residue_contact_frequency(contacts)
+    y_initial = total_mean_residue_contact_frequency(contacts_initial)
+    y_final = total_mean_residue_contact_frequency(contacts_final)
+    fig = plot_contacts(y_all, y_initial, y_final)
+    fig.suptitle(title)
+    save_plot(fig, output_file)
+
 
 def main():
     parser = get_parser()
