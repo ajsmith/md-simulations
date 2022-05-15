@@ -241,6 +241,7 @@ def plot_contacts(y_all, y_initial, y_final):
     ax.legend()
     return fig
 
+
 def analyze_contacts(config, t_h):
     contact_file_paths = canonicalize_file_paths(
         config['config_path'],
@@ -295,6 +296,7 @@ def main():
         [config.get('output_file', 'sstructure.png')],
     )
     output_dir_path = Path(config['output_dir'])
+    output_dir_path.mkdir(parents=True, exist_ok=True)
 
     group_configs = config['groups']
     helices, totals, helices_pcts = process_files(stride_file_paths)
