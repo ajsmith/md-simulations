@@ -81,18 +81,35 @@ def process_contact_files(file_paths):
 def mean_residue_contact_frequency(contacts):
     return contacts.mean(axis=0)
 
+
 def total_mean_residue_contact_frequency(contacts):
     x = np.array([mean_residue_contact_frequency(c) for c in contacts])
     return x.mean(axis=0)
 
-def split_timeline(x, t_h):
+
+def split_contact_timeline(x, t_h):
     return (x[:t_h], x[t_h:])
 
-def split_timeline_all(xs, t_h):
-    timeline_pairs = [split_timeline(x, t_h) for x in xs]
-    xs_initial = np.array([pair[0] for pair in timeline_pairs])
-    xs_final = np.array([pair[1] for pair in timeline_pairs])
+
+def split_contact_timeline_all(xs, t_h):
+    timeline_pairs = [split_contact_timeline(x, t_h) for x in xs]
+    xs_initial = [pair[0] for pair in timeline_pairs]
+    xs_final = [pair[1] for pair in timeline_pairs]
     return (xs_initial, xs_final)
+
+
+def split_helix_timeline(x, t_h=None):
+    if t_h is None:
+        t_h = int(helix_denature_time(x))
+    return (x[:t_h], x[t_h:])
+
+
+def split_helix_timeline_all(xs, t_h=None):
+    timeline_pairs = [split_helix_timeline(x, t_h) for x in xs]
+    xs_initial = [pair[0] for pair in timeline_pairs]
+    xs_final = [pair[1] for pair in timeline_pairs]
+    return (xs_initial, xs_final)
+
 
 def group_sum(matrix, cols):
     return matrix[cols].sum(axis=0)
@@ -160,9 +177,10 @@ def apply_transforms(stats):
     return result
 
 
-def smooth(x):
-    return savgol_filter(x, 100, 1)
-    # return window_transform(x, 100)
+def smooth(x, window_size=100):
+    window_size = min(window_size, len(x) // 2)
+    return savgol_filter(x, window_size, 1)
+    # return window_transform(x, window_size)
 
 
 def save_plot(fig, output_file):
@@ -201,7 +219,7 @@ def plot_average_helix_all(helices_pcts, output_file):
 
 def helix_denature_time(helix_content, helix_fraction=0.4):
     result = 0
-    for t, content in enumerate(helix_content):
+    for t, content in enumerate(smooth(helix_content)):
         if content > 0.4:
             result = t
     return result
@@ -211,7 +229,7 @@ def plot_trajectory_helix_content(experiment, trajectory, y_raw, output_file):
     ncols = 2
     y_smooth = smooth(y_raw)
     y_mean = y_raw.mean()
-    t_denatured = helix_denature_time(y_smooth)
+    t_denatured = helix_denature_time(y_raw)
     helix_mean = y_raw[:t_denatured].mean()
     denatured_mean = y_raw[t_denatured:].mean()
     fig, (ax1, ax2) = plt.subplots(nrows=2)
@@ -251,7 +269,7 @@ def analyze_contacts(config, t_h):
     output_file = output_dir_path / 'contacts.png'
     title = 'Average Ibuprofin Contacts'
     contacts = process_contact_files(contact_file_paths)
-    contacts_initial, contacts_final = split_timeline_all(contacts, t_h)
+    contacts_initial, contacts_final = split_contact_timeline_all(contacts, t_h)
     y_all = total_mean_residue_contact_frequency(contacts)
     y_initial = total_mean_residue_contact_frequency(contacts_initial)
     y_final = total_mean_residue_contact_frequency(contacts_final)
@@ -265,6 +283,7 @@ def plot_t_h(t_h_data):
     labels = ['$t_{h,ibu}$', '$t_{h,water}$']
     data = [t_h_data['ibu_t_h'], t_h_data['water_t_h']]
     ax.boxplot(data, labels=labels)
+    ax.set_ylabel('t')
     fig.suptitle('Helix dissolution time of Ibuprofen and Water systems')
     return fig
 
@@ -272,7 +291,7 @@ def plot_t_h(t_h_data):
 def calculate_t_h(group_configs, helices_pcts):
     result = {}
     result['t_h'] = t_h = np.array([
-        helix_denature_time(smooth(x)) for x in helices_pcts
+        helix_denature_time(x) for x in helices_pcts
     ])
     result['t_h_mean'] = t_h.mean()
     for group_config in group_configs:
@@ -282,6 +301,41 @@ def calculate_t_h(group_configs, helices_pcts):
         result[f'{name}_t_h'] = t_h[cols]
         result[f'{name}_t_h_mean'] = group_mean(t_h, cols)
     return result
+
+
+def helix_timeline_means(helices_pcts):
+    ys_initial, ys_final = split_helix_timeline_all(helices_pcts)
+    ys_initial = [y.mean() for y in ys_initial]
+    ys_final = [y.mean() for y in ys_final]
+    return (ys_initial, ys_final)
+
+
+def analyze_helix_timelines(config, helices_pcts):
+    output_dir_path = Path(config['output_dir'])
+    output_file = output_dir_path / 't_h_batch_compare.png'
+    ibu_config, water_config = config['groups']
+    ibu_cols = ibu_config['cols']
+    water_cols = water_config['cols']
+    labels = ['Ibu', 'Water']
+
+    y1, y2 = helix_timeline_means(helices_pcts)
+    y1 = np.array(y1)
+    y2 = np.array(y2)
+    fig, (ax1, ax2) = plt.subplots(ncols=2, sharex=True, sharey=True)
+
+    data1 = [y1[ibu_cols], y1[water_cols]]
+    ax1.boxplot(data1, labels=labels)
+    ax1.set_ylabel('$<H_{initial}>$')
+
+    data2 = [y2[ibu_cols], y2[water_cols]]
+    ax2.boxplot(data2, labels=labels)
+    ax2.set_ylabel('$<H_{final}>$')
+
+    fig.suptitle(
+        'Average helical structure before and after helix dissolution, '
+        '$t_{h,m}$'
+    )
+    save_plot(fig, output_file)
 
 
 def main():
@@ -327,5 +381,8 @@ def main():
     title = 'Average helix structure (%) of IBU and Water systems'
     make_plot(title, group_stats, output_dir_path / 'stride-groups.png')
     plot_average_helix_all(helices_pcts, output_dir_path / 'stride-all.png')
+
+    analyze_helix_timelines(config, helices_pcts)
+
     ibu_t_h = int(t_h_data['ibu_t_h_mean'])
     analyze_contacts(config, ibu_t_h)

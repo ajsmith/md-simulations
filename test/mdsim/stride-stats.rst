@@ -112,6 +112,56 @@ STRIDE
     structure_count: 140
     steps: 10
 
+    >>> from mdsim.stride import helix_denature_time
+    >>> y_raw = helices_pcts[2]
+    >>> t_h = helix_denature_time(y_raw)
+    >>> t_h
+    4
+    >>> y_raw[:t_h]
+    array([0.85714286, 0.85714286, 0.85714286, 0.85714286])
+    >>> y_raw[t_h:]
+    array([0.85714286, 0.        , 0.        , 0.        , 0.        ,
+           0.        ])
+
+    >>> from mdsim.stride import split_helix_timeline
+    >>> y1, y2 = split_helix_timeline(y_raw, 1)
+    >>> y1
+    array([0.85714286])
+    >>> y2
+    array([0.85714286, 0.85714286, 0.85714286, 0.85714286, 0.        ,
+           0.        , 0.        , 0.        , 0.        ])
+    >>> y1, y2 = split_helix_timeline(y_raw)
+    >>> (y1 == y_raw[:t_h]).all()
+    True
+    >>> (y2 == y_raw[t_h:]).all()
+    True
+
+    >>> from mdsim.stride import split_helix_timeline_all
+    >>> ys_initial, ys_final = split_helix_timeline_all(helices_pcts)
+    >>> for y in ys_initial:
+    ...     y.shape
+    (9,)
+    (9,)
+    (4,)
+    (9,)
+    >>> for y in ys_final:
+    ...     y.shape
+    (1,)
+    (1,)
+    (6,)
+    (1,)
+    >>> (ys_initial[2] == y1).all()
+    True
+    >>> (ys_final[2] == y2).all()
+    True
+
+    >>> from mdsim.stride import helix_timeline_means
+    >>> ys_initial, ys_final = helix_timeline_means(helices_pcts)
+    >>> ys_initial
+    [0.8571428571428571, 0.8571428571428571, 0.8571428571428571, 0.6666666666666666]
+    >>> ys_final
+    [0.8571428571428571, 0.8571428571428571, 0.14285714285714285, 0.8571428571428571]
+
 
 Contacts
 ========
@@ -185,8 +235,8 @@ Contacts
     >>> total_mean_residue_contact_frequency(contacts)
     array([1.  , 0.9 , 1.3 , 0.6 , 0.5 , 0.55, 0.55])
 
-    >>> from mdsim.stride import split_timeline
-    >>> c1_initial, c1_final = split_timeline(c1, 5)
+    >>> from mdsim.stride import split_contact_timeline
+    >>> c1_initial, c1_final = split_contact_timeline(c1, 5)
     >>> c1_initial
     array([[1, 1, 2, 0, 0, 1, 1],
            [1, 1, 2, 0, 1, 0, 0],
@@ -200,36 +250,37 @@ Contacts
            [1, 1, 2, 1, 1, 1, 1],
            [1, 1, 2, 1, 2, 0, 1]], dtype=uint64)
 
-    >>> from mdsim.stride import split_timeline_all
-    >>> contacts_initial, contacts_final = split_timeline_all(contacts, 5)
-    >>> contacts_initial.shape
-    (2, 5, 7)
-    >>> contacts_initial
-    array([[[1, 1, 2, 0, 0, 1, 1],
-            [1, 1, 2, 0, 1, 0, 0],
-            [1, 1, 2, 1, 0, 0, 0],
-            [1, 1, 2, 1, 0, 0, 1],
-            [1, 1, 2, 1, 0, 1, 0]],
-    <BLANKLINE>
-           [[1, 0, 3, 2, 0, 1, 0],
-            [1, 0, 3, 2, 0, 1, 2],
-            [1, 1, 0, 0, 0, 0, 0],
-            [1, 1, 0, 0, 0, 0, 1],
-            [1, 1, 0, 0, 0, 1, 0]]], dtype=uint64)
-    >>> contacts_final.shape
-    (2, 5, 7)
-    >>> contacts_final
-    array([[[1, 1, 2, 1, 0, 1, 1],
-            [1, 1, 2, 1, 1, 0, 0],
-            [1, 1, 2, 1, 1, 1, 0],
-            [1, 1, 2, 1, 1, 1, 1],
-            [1, 1, 2, 1, 2, 0, 1]],
-    <BLANKLINE>
-           [[1, 1, 0, 0, 0, 1, 1],
-            [1, 1, 0, 0, 1, 0, 0],
-            [1, 1, 0, 0, 1, 0, 1],
-            [1, 1, 0, 0, 1, 1, 0],
-            [1, 1, 0, 0, 1, 1, 1]]], dtype=uint64)
+    >>> from mdsim.stride import split_contact_timeline_all
+    >>> contacts_initial, contacts_final = split_contact_timeline_all(
+    ...     contacts, 5)
+    >>> len(contacts_initial)
+    2
+    >>> contacts_initial[0]
+    array([[1, 1, 2, 0, 0, 1, 1],
+           [1, 1, 2, 0, 1, 0, 0],
+           [1, 1, 2, 1, 0, 0, 0],
+           [1, 1, 2, 1, 0, 0, 1],
+           [1, 1, 2, 1, 0, 1, 0]], dtype=uint64)
+    >>> contacts_initial[1]
+    array([[1, 0, 3, 2, 0, 1, 0],
+           [1, 0, 3, 2, 0, 1, 2],
+           [1, 1, 0, 0, 0, 0, 0],
+           [1, 1, 0, 0, 0, 0, 1],
+           [1, 1, 0, 0, 0, 1, 0]], dtype=uint64)
+    >>> len(contacts_final)
+    2
+    >>> contacts_final[0]
+    array([[1, 1, 2, 1, 0, 1, 1],
+           [1, 1, 2, 1, 1, 0, 0],
+           [1, 1, 2, 1, 1, 1, 0],
+           [1, 1, 2, 1, 1, 1, 1],
+           [1, 1, 2, 1, 2, 0, 1]], dtype=uint64)
+    >>> contacts_final[1]
+    array([[1, 1, 0, 0, 0, 1, 1],
+           [1, 1, 0, 0, 1, 0, 0],
+           [1, 1, 0, 0, 1, 0, 1],
+           [1, 1, 0, 0, 1, 1, 0],
+           [1, 1, 0, 0, 1, 1, 1]], dtype=uint64)
     >>> total_mean_residue_contact_frequency(contacts_initial)
     array([1. , 0.8, 1.6, 0.7, 0.1, 0.5, 0.5])
     >>> total_mean_residue_contact_frequency(contacts_final)
