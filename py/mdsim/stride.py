@@ -156,8 +156,7 @@ def window_transform(x, window_size):
 
 def apply_transforms(stats):
     result = dict(stats)
-    result['y'] = savgol_filter(stats['y'], 100, 1)
-    # result['y'] = window_transform(stats['y'], 100)
+    result['y'] = smooth(stats['y'])
     return result
 
 
@@ -177,13 +176,26 @@ def make_plot(title, group_stats, output_file):
     for (ax, (name, st)) in zip(axs, group_stats.items()):
         st = apply_transforms(st)
         y = st['y']
-        ax.plot(y, color='b')
+        ax.plot(y)
         y_mean = st['y_mean']
         ax.axhline(y_mean, label=f'$<H_{{{name}}}>$', ls=':', color='m')
         ax.legend()
         ax.set_ylabel(f"$<H_{{{name}}}(t)>$")
     axs[-1].set_xlabel('t')
     fig.suptitle(title)
+    save_plot(fig, output_file)
+
+
+def plot_average_helix_all(helices_pcts, output_file):
+    fig, ax = plt.subplots()
+    y = smooth(helices_pcts.mean(axis=0))
+    ax.plot(y)
+    y_mean = y.mean()
+    ax.axhline(y_mean, label='$<H_{all}>$', ls=':', color='m')
+    ax.legend()
+    ax.set_ylabel('$<H_{all}(t)>$')
+    ax.set_xlabel('t')
+    fig.suptitle('Average helix structure (%) for all trajectories')
     save_plot(fig, output_file)
 
 
@@ -229,7 +241,6 @@ def plot_contacts(y_all, y_initial, y_final):
     ax.legend()
     return fig
 
-
 def analyze_contacts(config, t_h):
     contact_file_paths = canonicalize_file_paths(
         config['config_path'],
@@ -246,6 +257,15 @@ def analyze_contacts(config, t_h):
     fig = plot_contacts(y_all, y_initial, y_final)
     fig.suptitle(title)
     save_plot(fig, output_file)
+
+
+def plot_t_h(t_h_data):
+    fig, ax = plt.subplots()
+    labels = ['$t_{h,ibu}$', '$t_{h,water}$']
+    data = [t_h_data['ibu_t_h'], t_h_data['water_t_h']]
+    ax.boxplot(data, labels=labels)
+    fig.suptitle('Helix dissolution time of Ibuprofen and Water systems')
+    return fig
 
 
 def calculate_t_h(group_configs, helices_pcts):
@@ -275,7 +295,6 @@ def main():
         [config.get('output_file', 'sstructure.png')],
     )
     output_dir_path = Path(config['output_dir'])
-    title = config.get('title', '')
 
     group_configs = config['groups']
     helices, totals, helices_pcts = process_files(stride_file_paths)
@@ -283,6 +302,8 @@ def main():
     t_h_mean = t_h_data['t_h_mean']
     print(t_h_data['t_h'])
     print(f'Average t_h: {t_h_mean:.3f} ps')
+    fig = plot_t_h(t_h_data)
+    save_plot(fig, output_dir_path / 't_h.png')
 
     for group_config in group_configs:
         group_name = group_config['name']
@@ -301,6 +322,8 @@ def main():
         for conf in group_configs
     )
     group_stats = dict((name, stats(data)) for (name, data) in groups.items())
-    make_plot(title, group_stats, output_dir_path / 'sstruture.png')
+    title = 'Average helix structure (%) of IBU and Water systems'
+    make_plot(title, group_stats, output_dir_path / 'stride-groups.png')
+    plot_average_helix_all(helices_pcts, output_dir_path / 'stride-all.png')
     ibu_t_h = int(t_h_data['ibu_t_h_mean'])
     analyze_contacts(config, ibu_t_h)
